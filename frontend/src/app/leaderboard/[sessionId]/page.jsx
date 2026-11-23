@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import api from '../../../api/axios';
+import { getSessionLeaderboard } from '../../../lib/supabase';
 import { useAuth } from '../../../context/AuthContext';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import LoadingSpinner from '../../../components/LoadingSpinner';
@@ -33,30 +33,14 @@ function LeaderboardContent() {
     if (!sessionId) return;
     if (isManual) setRefreshing(true);
     try {
-      const res = await api.get(`/leaderboard/sessions/${sessionId}`);
-      const data = res.data;
+      const data = await getSessionLeaderboard(sessionId);
       const list = Array.isArray(data)
         ? data
         : data.leaderboard || data.participants || [];
       setLeaderboard(list);
 
-      if (data.session?.title || data.session_title) {
-        setSessionTitle(data.session?.title || data.session_title);
-      } else {
-        try {
-          const sRes = isAdmin
-            ? await api.get(`/admin/sessions/${sessionId}`)
-            : await api.get('/quiz/sessions');
-          if (isAdmin) {
-            setSessionTitle(sRes.data.session?.title || sRes.data.title || 'Quiz Session');
-          } else {
-            const sessionsList = Array.isArray(sRes.data) ? sRes.data : sRes.data.sessions || [];
-            const cur = sessionsList.find((s) => (s.id || s._id) === sessionId);
-            if (cur) setSessionTitle(cur.title);
-          }
-        } catch {
-          // Ignore secondary session title lookup error
-        }
+      if (data.session_title || data.session?.title) {
+        setSessionTitle(data.session_title || data.session?.title);
       }
     } catch (err) {
       console.error('Failed to load leaderboard:', err);

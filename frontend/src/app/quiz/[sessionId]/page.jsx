@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import api from '../../../api/axios';
+import { getLiveSessions, joinQuizSession, submitQuizAttempt } from '../../../lib/supabase';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import QuestionCard from '../../../components/QuestionCard';
 import Timer from '../../../components/Timer';
@@ -79,20 +79,17 @@ function QuizPlayContent() {
     const recoverSession = async () => {
       try {
         setLoading(true);
-        const res = await api.get('/quiz/sessions');
-        const list = Array.isArray(res.data) ? res.data : res.data.sessions || [];
+        const list = await getLiveSessions();
         const found = list.find((s) => (s.id || s._id) === sessionId);
         if (found && found.join_code) {
-          const joinRes = await api.post('/quiz/sessions/join', {
-            join_code: found.join_code,
-          });
-          setSession(joinRes.data.session);
-          setAttempt(joinRes.data.attempt);
-          setQuestions(joinRes.data.questions || []);
+          const joinRes = await joinQuizSession(found.join_code);
+          setSession(joinRes.session);
+          setAttempt(joinRes.attempt);
+          setQuestions(joinRes.questions || []);
           if (typeof window !== 'undefined') {
             sessionStorage.setItem(
               `quiz_data_${sessionId}`,
-              JSON.stringify(joinRes.data)
+              JSON.stringify(joinRes)
             );
           }
         } else {
@@ -154,20 +151,21 @@ function QuizPlayContent() {
       });
 
       const attemptId = attempt.id || attempt._id;
-      const res = await api.post(`/quiz/attempts/${attemptId}/submit`, {
-        answers: formattedAnswers,
-      });
+      const res = await submitQuizAttempt(attemptId, formattedAnswers);
 
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem(`quiz_answers_${sessionId}`);
         sessionStorage.removeItem(`quiz_data_${sessionId}`);
+        if (res) {
+          sessionStorage.setItem(`quiz_result_${attemptId}`, JSON.stringify(res));
+        }
       }
 
       toast.success('Quiz submitted successfully!');
       router.replace(`/results/${attemptId}`);
     } catch (err) {
       console.error('Submit quiz error:', err);
-      const msg = err.response?.data?.message || err.response?.data?.error || 'Failed to submit quiz';
+      const msg = err.message || err.response?.data?.message || err.response?.data?.error || 'Failed to submit quiz';
       toast.error(msg);
       setIsSubmitting(false);
     }

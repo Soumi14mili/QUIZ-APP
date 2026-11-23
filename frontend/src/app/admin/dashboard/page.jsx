@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import api from '../../../api/axios';
+import { getAdminSessions, updateQuizSession, deleteQuizSession, getSessionLeaderboard } from '../../../lib/supabase';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import SessionForm from '../../../components/SessionForm';
 import LoadingSpinner from '../../../components/LoadingSpinner';
@@ -36,9 +36,8 @@ function AdminDashboardContent() {
   const fetchSessions = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/admin/sessions');
-      const list = Array.isArray(res.data) ? res.data : res.data.sessions || [];
-      setSessions(list);
+      const list = await getAdminSessions();
+      setSessions(list || []);
     } catch (err) {
       console.error('Failed to load admin sessions:', err);
       toast.error('Failed to load sessions');
@@ -57,7 +56,7 @@ function AdminDashboardContent() {
     }
 
     try {
-      await api.delete(`/admin/sessions/${id}`);
+      await deleteQuizSession(id);
       toast.success('Session deleted successfully');
       setSessions((prev) => prev.filter((s) => (s.id || s._id) !== id));
     } catch (err) {
@@ -69,10 +68,7 @@ function AdminDashboardContent() {
   const handleStatusChange = async (session, newStatus) => {
     const sessionId = session.id || session._id;
     try {
-      await api.put(`/admin/sessions/${sessionId}`, {
-        title: session.title,
-        description: session.description,
-        duration_minutes: session.duration_minutes,
+      await updateQuizSession(sessionId, {
         status: newStatus,
       });
       toast.success(`Session status changed to ${newStatus}`);
@@ -88,10 +84,21 @@ function AdminDashboardContent() {
   const handleExportCSV = async (sessionId, sessionTitle) => {
     try {
       toast.loading('Preparing CSV export...', { id: 'export-csv' });
-      const response = await api.get(`/admin/sessions/${sessionId}/export`, {
-        responseType: 'blob',
-      });
-      const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' });
+      const data = await getSessionLeaderboard(sessionId);
+      const rows = data.leaderboard || [];
+
+      const csvContent = [
+        ['Rank', 'Student Name', 'Score', 'Total Questions', 'Time Taken (s)'].join(','),
+        ...rows.map((r) => [
+          r.rank,
+          `"${(r.student_name || '').replace(/"/g, '""')}"`,
+          r.score,
+          r.total_questions || '',
+          (r.time_taken_ms ? (r.time_taken_ms / 1000).toFixed(1) : '0'),
+        ].join(',')),
+      ].join('\r\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;

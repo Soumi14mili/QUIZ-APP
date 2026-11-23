@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import api from '../../../../../api/axios';
+import { supabase, getSessionQuestions, addQuestion, updateQuestion, deleteQuestion } from '../../../../../lib/supabase';
 import ProtectedRoute from '../../../../../components/ProtectedRoute';
 import LoadingSpinner from '../../../../../components/LoadingSpinner';
 import {
@@ -43,16 +43,14 @@ function QuestionManagerContent() {
     if (!sessionId) return;
     try {
       setLoading(true);
-      const [sessionRes, questionsRes] = await Promise.all([
-        api.get(`/admin/sessions/${sessionId}`),
-        api.get(`/admin/sessions/${sessionId}/questions`),
+      const [{ data: sessionData, error: sErr }, qList] = await Promise.all([
+        supabase.from('quiz_sessions').select('*').eq('id', sessionId).single(),
+        getSessionQuestions(sessionId),
       ]);
 
-      setSession(sessionRes.data.session || sessionRes.data);
-      const qList = Array.isArray(questionsRes.data)
-        ? questionsRes.data
-        : questionsRes.data.questions || [];
-      setQuestions(qList);
+      if (sErr) throw sErr;
+      setSession(sessionData);
+      setQuestions(qList || []);
     } catch (err) {
       console.error('Failed to load questions:', err);
       toast.error('Failed to load session details and questions');
@@ -93,7 +91,7 @@ function QuestionManagerContent() {
     }
 
     try {
-      await api.delete(`/admin/questions/${questionId}`);
+      await deleteQuestion(questionId);
       toast.success('Question removed');
       setQuestions((prev) => prev.filter((q) => (q.id || q._id) !== questionId));
     } catch (err) {
@@ -123,15 +121,13 @@ function QuestionManagerContent() {
       setFormLoading(true);
       if (editingQuestion) {
         const qId = editingQuestion.id || editingQuestion._id;
-        const res = await api.put(`/admin/questions/${qId}`, payload);
-        const updated = res.data.question || res.data;
+        const updated = await updateQuestion(qId, payload);
         setQuestions((prev) =>
           prev.map((q) => ((q.id || q._id) === qId ? { ...q, ...payload, ...updated } : q))
         );
         toast.success('Question updated successfully');
       } else {
-        const res = await api.post(`/admin/sessions/${sessionId}/questions`, payload);
-        const created = res.data.question || res.data;
+        const created = await addQuestion(sessionId, payload);
         setQuestions((prev) => [...prev, created]);
         toast.success('Question added successfully');
       }
@@ -139,7 +135,7 @@ function QuestionManagerContent() {
       setIsModalOpen(false);
     } catch (err) {
       console.error('Save question error:', err);
-      const msg = err.response?.data?.message || err.response?.data?.error || 'Failed to save question';
+      const msg = err.message || err.response?.data?.message || err.response?.data?.error || 'Failed to save question';
       toast.error(msg);
     } finally {
       setFormLoading(false);

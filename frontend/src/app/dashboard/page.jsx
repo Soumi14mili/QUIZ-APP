@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import api from '../../api/axios';
+import { getLiveSessions, joinQuizSession } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import ProtectedRoute from '../../components/ProtectedRoute';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -32,9 +32,8 @@ function StudentDashboardContent() {
   const fetchSessions = async (isManualRefresh = false) => {
     if (isManualRefresh) setRefreshing(true);
     try {
-      const response = await api.get('/quiz/sessions');
-      const sessionList = Array.isArray(response.data) ? response.data : response.data.sessions || [];
-      setSessions(sessionList);
+      const sessionList = await getLiveSessions();
+      setSessions(sessionList || []);
     } catch (err) {
       console.error('Failed to fetch live quiz sessions:', err);
       toast.error('Failed to load available quizzes');
@@ -57,8 +56,8 @@ function StudentDashboardContent() {
 
     try {
       setJoining(true);
-      const res = await api.post('/quiz/sessions/join', { join_code: code });
-      const { attempt, session, questions } = res.data;
+      const res = await joinQuizSession(code);
+      const { attempt, session, questions } = res;
 
       const sessionId = session.id || session._id;
       if (typeof window !== 'undefined') {
@@ -73,7 +72,7 @@ function StudentDashboardContent() {
     } catch (err) {
       console.error('Join quiz error:', err);
       const errorMsg =
-        err.response?.data?.message || err.response?.data?.error || 'Unable to join quiz with this code';
+        err.message || err.response?.data?.message || err.response?.data?.error || 'Unable to join quiz with this code';
       toast.error(errorMsg);
     } finally {
       setJoining(false);

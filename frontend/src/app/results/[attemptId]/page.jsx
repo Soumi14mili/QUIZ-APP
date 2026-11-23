@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import api from '../../../api/axios';
+import { getAttemptResult } from '../../../lib/supabase';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import ResultCard from '../../../components/ResultCard';
 import LoadingSpinner from '../../../components/LoadingSpinner';
@@ -50,8 +50,7 @@ function ResultsContent() {
       const fetchResult = async () => {
         try {
           setLoading(true);
-          const res = await api.get(`/quiz/attempts/${attemptId}`);
-          const data = res.data.attempt || res.data;
+          const data = await getAttemptResult(attemptId);
           setResultData(data);
           if (typeof window !== 'undefined') {
             sessionStorage.setItem(`quiz_result_${attemptId}`, JSON.stringify(data));

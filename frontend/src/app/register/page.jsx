@@ -38,12 +38,19 @@ export default function RegisterPage() {
 
     try {
       setSubmitting(true);
-      await register(fullName.trim(), email.trim(), password);
-      toast.success('Account created successfully!');
-      router.push('/dashboard');
+      const res = await register(fullName.trim(), email.trim(), password);
+      if (res?.session) {
+        toast.success('Account created successfully!');
+        router.push('/dashboard');
+      } else {
+        toast.success('Account created! Please check your email to verify your account.', {
+          duration: 6000,
+        });
+        router.push('/login');
+      }
     } catch (err) {
       console.error('Registration error:', err);
-      const msg = err.response?.data?.message || err.response?.data?.error || 'Failed to create account';
+      const msg = err.message || err.response?.data?.message || err.response?.data?.error || 'Failed to create account';
       toast.error(msg);
     } finally {
       setSubmitting(false);

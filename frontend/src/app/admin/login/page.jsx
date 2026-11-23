@@ -30,7 +30,7 @@ export default function AdminLoginPage() {
       router.push('/admin/dashboard');
     } catch (err) {
       console.error('Admin login error:', err);
-      const msg = err.response?.data?.message || err.response?.data?.error || 'Invalid administrator credentials';
+      const msg = err.message || err.response?.data?.message || err.response?.data?.error || 'Invalid administrator credentials';
       toast.error(msg);
     } finally {
       setSubmitting(false);
@@ -126,8 +126,11 @@ export default function AdminLoginPage() {
               </button>
             </form>
 
-            <p className="mt-5 text-xs text-[#87a59d]">
-              Only authorized quiz administrators can continue.
+            <p className="mt-5 text-center text-xs text-[#87a59d]">
+              New administrator?{' '}
+              <Link href="/admin/register" className="font-bold text-[#f7b955] underline underline-offset-4">
+                Register admin profile
+              </Link>
             </p>
           </section>
         </div>

@@ -30,7 +30,7 @@ export default function LoginPage() {
       router.push('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
-      const msg = err.response?.data?.message || err.response?.data?.error || 'Invalid email or password';
+      const msg = err.message || err.response?.data?.message || err.response?.data?.error || 'Invalid email or password';
       toast.error(msg);
     } finally {
       setSubmitting(false);

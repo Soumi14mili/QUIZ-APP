@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import api from '../api/axios';
+import { createQuizSession, updateQuizSession } from '../lib/supabase';
 import { FiX, FiClock, FiFileText, FiLayers, FiCheck } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
@@ -52,12 +52,12 @@ const SessionForm = ({ isOpen, onClose, onSuccess, initialData = null }) => {
       };
 
       if (isEdit) {
-        payload.status = status;
+        payload.status = status.toLowerCase();
         const sessionId = initialData.id || initialData._id;
-        await api.put(`/admin/sessions/${sessionId}`, payload);
+        await updateQuizSession(sessionId, payload);
         toast.success('Session updated successfully');
       } else {
-        await api.post('/admin/sessions', payload);
+        await createQuizSession(payload);
         toast.success('New quiz session created');
       }
 
@@ -65,7 +65,7 @@ const SessionForm = ({ isOpen, onClose, onSuccess, initialData = null }) => {
       onClose();
     } catch (err) {
       console.error('Save session error:', err);
-      const msg = err.response?.data?.message || err.response?.data?.error || 'Failed to save session';
+      const msg = err.message || err.response?.data?.message || err.response?.data?.error || 'Failed to save session';
       toast.error(msg);
     } finally {
       setLoading(false);
