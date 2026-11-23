@@ -216,12 +216,17 @@ export const createQuizSession = async ({ title, description, duration_minutes }
 };
 
 export const updateQuizSession = async (sessionId, updateData) => {
+  const payload = {
+    ...updateData,
+    updated_at: new Date().toISOString(),
+  };
+  if (payload.status) {
+    payload.status = payload.status.toLowerCase();
+  }
+
   const { data, error } = await supabase
     .from('quiz_sessions')
-    .update({
-      ...updateData,
-      updated_at: new Date().toISOString(),
-    })
+    .update(payload)
     .eq('id', sessionId)
     .select()
     .single();

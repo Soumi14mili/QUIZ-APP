@@ -11,7 +11,7 @@ const SessionForm = ({ isOpen, onClose, onSuccess, initialData = null }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [durationMinutes, setDurationMinutes] = useState(15);
-  const [status, setStatus] = useState('Draft');
+  const [status, setStatus] = useState('draft');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -19,12 +19,12 @@ const SessionForm = ({ isOpen, onClose, onSuccess, initialData = null }) => {
       setTitle(initialData.title || '');
       setDescription(initialData.description || '');
       setDurationMinutes(initialData.duration_minutes || 15);
-      setStatus(initialData.status || 'Draft');
+      setStatus((initialData.status || 'draft').toLowerCase());
     } else {
       setTitle('');
       setDescription('');
       setDurationMinutes(15);
-      setStatus('Draft');
+      setStatus('draft');
     }
   }, [initialData, isOpen]);
 
@@ -154,13 +154,13 @@ const SessionForm = ({ isOpen, onClose, onSuccess, initialData = null }) => {
               </label>
               <select
                 id="status"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
+                value={status.toLowerCase()}
+                onChange={(e) => setStatus(e.target.value.toLowerCase())}
                 className="w-full px-4 py-3 rounded-xl border-2 border-[#173c34] bg-white text-[#173c34] font-bold focus:outline-none focus:shadow-[4px_4px_0_#173c34] transition-all"
               >
-                <option value="Draft">Draft (Only Admin can see & edit)</option>
-                <option value="Live">Live (Open for student joins)</option>
-                <option value="Ended">Ended (Submissions closed, results visible)</option>
+                <option value="draft">Draft (Only Admin can see & edit)</option>
+                <option value="live">Live (Open for student joins)</option>
+                <option value="ended">Ended (Submissions closed, results visible)</option>
               </select>
             </div>
           )}

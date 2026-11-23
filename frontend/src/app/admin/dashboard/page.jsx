@@ -67,17 +67,19 @@ function AdminDashboardContent() {
 
   const handleStatusChange = async (session, newStatus) => {
     const sessionId = session.id || session._id;
+    const normalized = newStatus.toLowerCase();
     try {
       await updateQuizSession(sessionId, {
-        status: newStatus,
+        status: normalized,
       });
-      toast.success(`Session status changed to ${newStatus}`);
+      toast.success(`Session status changed to ${normalized}`);
       setSessions((prev) =>
-        prev.map((s) => ((s.id || s._id) === sessionId ? { ...s, status: newStatus } : s))
+        prev.map((s) => ((s.id || s._id) === sessionId ? { ...s, status: normalized } : s))
       );
     } catch (err) {
       console.error('Failed to update status:', err);
-      toast.error('Failed to update session status');
+      const msg = err.message || 'Failed to update session status';
+      toast.error(msg);
     }
   };
 
@@ -115,15 +117,15 @@ function AdminDashboardContent() {
   };
 
   const filteredSessions = sessions.filter((s) => {
-    const matchesFilter = filterStatus === 'All' || s.status === filterStatus;
+    const matchesFilter = filterStatus === 'All' || s.status?.toLowerCase() === filterStatus.toLowerCase();
     const matchesSearch =
       s.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.join_code?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
-  const liveCount = sessions.filter((s) => s.status === 'Live').length;
-  const draftCount = sessions.filter((s) => s.status === 'Draft').length;
+  const liveCount = sessions.filter((s) => s.status?.toLowerCase() === 'live').length;
+  const draftCount = sessions.filter((s) => s.status?.toLowerCase() === 'draft').length;
   const totalParticipants = sessions.reduce((acc, curr) => acc + (curr.participant_count || 0), 0);
 
   return (
@@ -254,10 +256,11 @@ function AdminDashboardContent() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredSessions.map((session) => {
             const sessionId = session.id || session._id;
+            const curStatus = (session.status || 'draft').toLowerCase();
             const statusColor =
-              session.status === 'Live'
+              curStatus === 'live'
                 ? 'bg-[#b5e7d2] text-[#173c34] border-[#173c34]'
-                : session.status === 'Draft'
+                : curStatus === 'draft'
                 ? 'bg-[#f7b955] text-[#173c34] border-[#173c34]'
                 : 'bg-[#eef3f0] text-[#173c34] border-[#173c34]';
 
@@ -272,13 +275,13 @@ function AdminDashboardContent() {
                     {/* Status dropdown */}
                     <div className="relative">
                       <select
-                        value={session.status || 'Draft'}
+                        value={curStatus}
                         onChange={(e) => handleStatusChange(session, e.target.value)}
                         className={`text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full border-2 cursor-pointer focus:outline-none ${statusColor}`}
                       >
-                        <option value="Draft">Draft</option>
-                        <option value="Live">Live</option>
-                        <option value="Ended">Ended</option>
+                        <option value="draft">Draft</option>
+                        <option value="live">Live</option>
+                        <option value="ended">Ended</option>
                       </select>
                     </div>
 
