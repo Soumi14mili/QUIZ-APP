@@ -256,3 +256,56 @@ export function SquiggleDark({ isDark = false, className = '' }) {
     </svg>
   );
 }
+
+export function QuestionMarkDoodle({
+  className = 'w-14 h-20 text-[#5ce1e6]',
+  animate = true,
+}) {
+  return (
+    <div className={`inline-block ${animate ? 'animate-float-reverse' : ''} ${className}`}>
+      <svg viewBox="0 0 60 90" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full overflow-visible">
+        <path
+          d="M12 26c0-10 8-18 18-18s18 8 18 18c0 14-16 16-16 26v4"
+          stroke="currentColor"
+          strokeWidth="7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx="32" cy="76" r="4.5" fill="currentColor" />
+      </svg>
+    </div>
+  );
+}
+
+export function SquigglyWave({
+  className = 'w-32 h-10 text-[#5ce1e6]',
+  animate = true,
+}) {
+  return (
+    <div className={`inline-block ${animate ? 'animate-float-sway' : ''} ${className}`}>
+      <svg viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+        <path
+          d="M10 20 Q 30 5, 50 20 T 90 20 T 130 20 T 150 20"
+          stroke="currentColor"
+          strokeWidth="4"
+          strokeLinecap="round"
+          fill="none"
+        />
+      </svg>
+    </div>
+  );
+}
+
+export function Starburst({
+  className = 'w-8 h-8 text-[#5ce1e6]',
+}) {
+  return (
+    <svg viewBox="0 0 40 40" fill="currentColor" className={`animate-spin-slow ${className}`}>
+      <circle cx="20" cy="20" r="3" />
+      <line x1="20" y1="4" x2="20" y2="36" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="4" y1="20" x2="36" y2="20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="8.7" y1="8.7" x2="31.3" y2="31.3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <line x1="8.7" y1="31.3" x2="31.3" y2="8.7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
