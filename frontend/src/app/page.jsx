@@ -229,6 +229,11 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
+        <div className="mx-auto max-w-6xl text-center pt-4 mt-4 border-t border-[#d9ded8]/40">
+          <p className="text-[11px] font-medium text-[#7e8f88]">
+            Made with <span className="text-[#e65f45]">♡</span> by Soumili &amp; Swarnendu
+          </p>
+        </div>
       </footer>
     </div>
   );
