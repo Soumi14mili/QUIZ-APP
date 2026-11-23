@@ -8,31 +8,32 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Manrope', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'Manrope', 'sans-serif'],
         display: ['Fraunces', 'serif'],
+        mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {
         brand: {
-          DEFAULT: '#173c34',
+          DEFAULT: '#13382e',
           dark: '#0d2923',
-          hover: '#225247',
+          hover: '#1b483e',
           light: '#eef3f0',
         },
         coral: {
-          DEFAULT: '#e65f45',
+          DEFAULT: '#e6674e',
           dark: '#a83a29',
           light: '#fff0ed',
         },
         golden: {
-          DEFAULT: '#f7b955',
+          DEFAULT: '#f6c453',
           hover: '#e5aa47',
         },
         cream: {
-          DEFAULT: '#f7f4ec',
+          DEFAULT: '#f5f3ec',
           dark: '#eceeea',
         },
         mint: {
-          DEFAULT: '#b5e7d2',
+          DEFAULT: '#99e2c6',
           dark: '#236653',
           light: '#e8f5ef',
         },

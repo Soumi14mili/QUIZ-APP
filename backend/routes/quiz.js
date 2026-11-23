@@ -116,6 +116,52 @@ router.post('/sessions/join', async (req, res, next) => {
   }
 });
 
+// GET /attempts/:attemptId — get attempt result (after submission)
+router.get('/attempts/:attemptId', async (req, res, next) => {
+  try {
+    const { attemptId } = req.params;
+
+    const attemptQuery = await pool.query(
+      `SELECT qa.id, qa.session_id, qa.student_id, qa.started_at, qa.submitted_at,
+              qa.time_taken_ms, qa.score, qa.total_questions, qa.status
+       FROM quiz_attempts qa
+       WHERE qa.id = $1 AND qa.student_id = $2`,
+      [attemptId, req.user.id]
+    );
+
+    if (attemptQuery.rows.length === 0) {
+      return res.status(404).json({ error: 'Quiz attempt not found' });
+    }
+
+    const attempt = attemptQuery.rows[0];
+
+    if (attempt.status !== 'submitted') {
+      return res.status(400).json({ error: 'Quiz attempt has not been submitted yet' });
+    }
+
+    // Fetch questions with correct answers and student's answers
+    const breakdownQuery = await pool.query(
+      `SELECT q.id AS question_id, q.question_text, q.option_a, q.option_b,
+              q.option_c, q.option_d, q.correct_option, a.selected_option,
+              (a.selected_option = q.correct_option) AS is_correct
+       FROM questions q
+       LEFT JOIN answers a ON a.question_id = q.id AND a.attempt_id = $1
+       WHERE q.session_id = $2
+       ORDER BY q.sort_order ASC, q.created_at ASC`,
+      [attemptId, attempt.session_id]
+    );
+
+    return res.json({
+      attempt: {
+        ...attempt,
+        breakdown: breakdownQuery.rows,
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 // POST /attempts/:attemptId/submit — submit answers
 router.post('/attempts/:attemptId/submit', async (req, res, next) => {
   const client = await pool.connect();
