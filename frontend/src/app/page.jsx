@@ -457,20 +457,20 @@ export default function HomePage() {
       {/* ======================================================== */}
       {/* 4. FOOTER                                                */}
       {/* ======================================================== */}
-      <footer className="border-t border-[#dcd5c4]/60 px-6 py-8">
-        <div className="mx-auto flex max-w-7xl flex-col sm:flex-row items-center justify-between gap-4 text-xs font-semibold text-[#576b63]">
+      <footer className={`border-t px-6 py-8 transition-colors duration-300 ${isDarkMode ? 'border-white/10' : 'border-[#dcd5c4]/60'}`}>
+        <div className={`mx-auto flex max-w-7xl flex-col sm:flex-row items-center justify-between gap-4 text-xs font-semibold ${isDarkMode ? 'text-[#8d91b5]' : 'text-[#576b63]'}`}>
           <span>© 2025 CloudQuest Learning</span>
           <div className="flex gap-6">
-            <Link href="/dashboard" className="hover:text-[#18332c] transition-colors">
+            <Link href="/dashboard" className={`transition-colors ${isDarkMode ? 'hover:text-white' : 'hover:text-[#18332c]'}`}>
               Leaderboard
             </Link>
-            <Link href="/admin/login" className="hover:text-[#18332c] transition-colors">
+            <Link href="/admin/login" className={`transition-colors ${isDarkMode ? 'hover:text-white' : 'hover:text-[#18332c]'}`}>
               Admin portal
             </Link>
           </div>
         </div>
-        <div className="mx-auto max-w-6xl text-center pt-4 mt-4 border-t border-[#d9ded8]/40">
-          <p className="text-[11px] font-medium text-[#7e8f88]">
+        <div className={`mx-auto max-w-7xl text-center pt-4 mt-4 border-t ${isDarkMode ? 'border-white/10' : 'border-[#dcd5c4]/40'}`}>
+          <p className={`text-[11px] font-medium tracking-wide ${isDarkMode ? 'text-[#8d91b5]' : 'text-[#7e8f88]'}`}>
             Made with <span className="text-[#e65f45]">♡</span> by Soumili &amp; Swarnendu
           </p>
         </div>

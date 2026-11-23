@@ -1,269 +1,173 @@
-# CloudQuest — Quiz Web Application
+# CloudQuest — AWS Knowledge Arena
 
-A full-stack, multi-session quiz platform built for 100+ concurrent users. Features dual authentication (Admin / Student), server-side timer enforcement, real-time leaderboards with time-based tie-breaking, and CSV exports.
+A competitive, timed quiz web application engineered for **100+ concurrent students** and instructors. Built with **Next.js 14 (App Router)** and powered natively by **Supabase** (PostgreSQL 17, Supabase Auth, Row-Level Security, and Postgres RPC functions).
 
-## Tech Stack
-
-| Layer        | Technology                                   |
-|:-------------|:---------------------------------------------|
-| Frontend     | Next.js 14 (App Router) + Tailwind CSS       |
-| Backend      | Node.js + Express.js                         |
-| Database     | PostgreSQL (with connection pooling & indexing)|
-| Auth         | JWT (Bearer tokens) + bcrypt password hashing |
+Deployed on **Vercel** and **Supabase Cloud**.
 
 ---
 
-## Project Structure
+## ⚡ Tech Stack
+
+| Layer | Technology | Description |
+| :--- | :--- | :--- |
+| **Frontend Framework** | **Next.js 14 (App Router)** | Modern React 18 server and client components |
+| **Styling & UI** | **Tailwind CSS** | Custom design system matching CloudQuest Figma spec |
+| **Backend & Database** | **Supabase (PostgreSQL 17)** | Managed PostgreSQL with connection pooling via **Supavisor** |
+| **Authentication** | **Supabase Auth (GoTrue)** | Secure email/password login, auto-verification emails, and session persistence |
+| **Database Security** | **Row-Level Security (RLS)** | Granular database engine policies protecting student & admin data |
+| **Server Logic** | **Postgres Stored Procedures (RPC)** | Atomic grading (`submit_quiz_attempt`), sanitized questions, and tiebreaker ranking |
+| **Hosting & CI/CD** | **Vercel + GitHub** | Automatic zero-downtime edge deployments connected to Supabase |
+
+---
+
+## 📁 Project Structure
 
 ```
-QUIZ APP/
-├── backend/
-│   ├── server.js              # Express entry point
-│   ├── package.json
-│   ├── .env.example           # Environment variable template
-│   ├── db/
-│   │   ├── schema.sql         # Complete PostgreSQL schema
-│   │   ├── pool.js            # Connection pool (max 20)
-│   │   └── init.js            # Schema initializer script
-│   ├── middleware/
-│   │   └── auth.js            # JWT + role-based middleware
-│   ├── routes/
-│   │   ├── auth.js            # Register, Login, Admin Login, /me
-│   │   ├── admin.js           # Session CRUD, Questions, Monitoring, CSV Export
-│   │   ├── quiz.js            # Student: list sessions, join, submit, get results
-│   │   └── leaderboard.js     # Public leaderboard by session
-│   └── utils/
-│       └── seed.js            # Admin account seeder
+QUIZ-APP/
+├── supabase/
+│   └── migrations/
+│       └── 20261123211500_cloudquest_init.sql  # Complete schema, RLS policies & RPC functions
 │
 ├── frontend/
-│   ├── next.config.js         # API proxy to backend
+│   ├── .env.example                            # Template for Supabase environment variables
+│   ├── .env.local                              # Local environment variables (gitignored)
+│   ├── next.config.js
 │   ├── tailwind.config.js
-│   ├── postcss.config.js
 │   ├── package.json
 │   └── src/
-│       ├── index.css           # Tailwind directives + custom styles
-│       ├── api/axios.js        # Axios instance with auth interceptors
-│       ├── context/AuthContext.jsx  # Auth state provider
-│       ├── components/         # Navbar, Timer, QuestionCard, ResultCard, etc.
-│       └── app/                # Next.js App Router pages
-│           ├── page.jsx                           # Landing page
-│           ├── layout.jsx                         # Root layout + providers
-│           ├── login/page.jsx                     # Student login
-│           ├── register/page.jsx                  # Student registration
-│           ├── admin/login/page.jsx               # Admin login
-│           ├── admin/dashboard/page.jsx           # Admin session manager
-│           ├── admin/sessions/[id]/questions/page.jsx  # Question manager
-│           ├── dashboard/page.jsx                 # Student dashboard
-│           ├── quiz/[sessionId]/page.jsx          # Live quiz play
-│           ├── results/[attemptId]/page.jsx       # Post-submission review
-│           └── leaderboard/[sessionId]/page.jsx   # Ranked leaderboard
+│       ├── lib/
+│       │   └── supabase.js                     # Supabase client instantiation & helper methods
+│       ├── context/
+│       │   └── AuthContext.jsx                 # Supabase Auth state provider with real-time listener
+│       ├── components/
+│       │   ├── Navbar.jsx                      # Navigation header with role-aware links
+│       │   ├── ProtectedRoute.jsx              # Client-side route guard (Student vs Admin)
+│       │   ├── QuestionCard.jsx                # Interactive multiple-choice card
+│       │   ├── ResultCard.jsx                  # Solution breakdown & answer key card
+│       │   ├── SessionForm.jsx                 # Modal for creating and updating quiz sessions
+│       │   ├── Timer.jsx                       # Quiz countdown clock
+│       │   └── LoadingSpinner.jsx
+│       └── app/
+│           ├── layout.jsx                      # Global HTML root layout
+│           ├── page.jsx                        # Landing page with Kawaii doodles, dot matrix & theme toggle
+│           ├── login/page.jsx                  # Student sign-in
+│           ├── register/page.jsx               # Student registration with email confirmation
+│           ├── dashboard/page.jsx              # Student dashboard & live quiz join
+│           ├── quiz/[sessionId]/page.jsx       # Timed quiz play arena
+│           ├── results/[attemptId]/page.jsx    # Score summary and question breakdown
+│           ├── leaderboard/[sessionId]/page.jsx# Live ranking podium & tiebreaker table
+│           ├── admin/login/page.jsx            # Instructor portal sign-in
+│           ├── admin/register/page.jsx         # Instructor setup protected by Admin Secret Key
+│           ├── admin/dashboard/page.jsx        # Quiz session manager, live status toggle & CSV export
+│           └── admin/sessions/[id]/questions/page.jsx # Question bank manager
 │
+├── backend/                                    # Legacy Express server (kept for fallback/reference)
 └── README.md
 ```
 
 ---
 
-## Prerequisites
+## 🚀 Getting Started
 
-- **Node.js** ≥ 18
-- **PostgreSQL** ≥ 14 (local install, Docker, or cloud: Supabase / Neon / Railway)
-- **npm** (comes with Node.js)
+### 1. Prerequisites
+- **Node.js** ≥ 18.x
+- **npm** or **pnpm**
+- A free **Supabase** account ([supabase.com](https://supabase.com))
 
----
-
-## Setup Instructions
-
-### 1. Clone & Configure Environment
+### 2. Configure Environment Variables
+Inside the `frontend/` directory, create a `.env.local` file (or copy from `.env.example`):
 
 ```bash
-cd backend
-cp .env.example .env
+cd frontend
+cp .env.example .env.local
 ```
 
-Edit `backend/.env` with your PostgreSQL credentials:
+Fill in your Supabase project credentials:
 
 ```env
-# ---- Database ----
-DATABASE_URL=postgresql://postgres:your_password@localhost:5432/quizapp
-
-# ---- JWT ----
-JWT_SECRET=change-this-to-a-long-random-string
-JWT_EXPIRES_IN=24h
-
-# ---- Admin Seed ----
-ADMIN_EMAIL=admin@quizapp.com
-ADMIN_PASSWORD=Admin@123456
-ADMIN_NAME=Quiz Master
-
-# ---- Server ----
-PORT=5000
-NODE_ENV=development
-
-# ---- Frontend URL (for CORS) ----
-FRONTEND_URL=http://localhost:3000
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-publishable-key
+NEXT_PUBLIC_ADMIN_SECRET_KEY=Admin@CloudQuest2026
 ```
 
-### 2. Create the PostgreSQL Database
-
-```bash
-# Using psql:
-psql -U postgres -c "CREATE DATABASE quizapp;"
-```
-
-### 3. Install Backend Dependencies & Initialize
-
-```bash
-cd backend
-npm install
-
-# Apply the database schema
-npm run db:init
-
-# Seed the initial admin account
-npm run seed
-```
-
-### 4. Install Frontend Dependencies
+### 3. Install Dependencies & Run Locally
 
 ```bash
 cd frontend
 npm install
-```
-
-### 5. Start Development Servers
-
-**Terminal 1 — Backend:**
-```bash
-cd backend
 npm run dev
-# → Runs on http://localhost:5000
 ```
 
-**Terminal 2 — Frontend:**
-```bash
-cd frontend
-npm run dev
-# → Runs on http://localhost:3000
-```
-
-The frontend proxies all `/api/*` requests to `http://localhost:5000` automatically via `next.config.js`.
+Visit **http://localhost:3000** in your browser.
 
 ---
 
-## Default Admin Credentials
+## 🛡️ Database & Business Logic (Supabase)
 
-| Field    | Value                   |
-|:---------|:------------------------|
-| Email    | `admin@quizapp.com`     |
-| Password | `Admin@123456`          |
+All database logic executes natively inside PostgreSQL via Stored Procedures (RPCs):
 
-Access the admin login at: **http://localhost:3000/admin/login**
+1. **`join_quiz_session(p_join_code)`**:
+   - Validates that the session is active (`live`).
+   - Creates or resumes the student's attempt with a server-side timestamp (`started_at = NOW()`).
+   - Serves the question list sanitized **without** `correct_option` to prevent client-side inspection.
 
----
+2. **`submit_quiz_attempt(p_attempt_id, p_answers)`**:
+   - Locks the attempt for update (`FOR UPDATE`) to prevent double submissions.
+   - Computes elapsed time in exact milliseconds strictly using server timestamps.
+   - Performs atomic grading across all questions in a single multi-row `UNNEST` SQL query.
+   - Updates score, total questions, and elapsed time in one transaction.
 
-## API Endpoints Summary
+3. **`get_session_leaderboard(p_session_id)`**:
+   - Ranks participants using the tiebreaker formula:
+     $$\text{Rank} = \text{ROW\_NUMBER}() \text{ OVER } (\text{ORDER BY score DESC, time\_taken\_ms ASC, submitted\_at ASC})$$
+   - Leverages the partial covering index `idx_attempts_leaderboard_tiebreaker` for sub-millisecond retrieval under 100+ concurrent requests.
 
-### Auth (`/api/auth`)
-| Method | Endpoint       | Description              | Auth Required |
-|:-------|:---------------|:-------------------------|:--------------|
-| POST   | `/register`    | Student registration     | No            |
-| POST   | `/login`       | Student login            | No            |
-| POST   | `/admin/login` | Admin login              | No            |
-| GET    | `/me`          | Current user info        | Yes           |
-
-### Admin (`/api/admin`) — Admin only
-| Method | Endpoint                        | Description                 |
-|:-------|:--------------------------------|:----------------------------|
-| POST   | `/sessions`                     | Create quiz session         |
-| GET    | `/sessions`                     | List all admin sessions     |
-| GET    | `/sessions/:id`                 | Session details             |
-| PUT    | `/sessions/:id`                 | Update session              |
-| DELETE | `/sessions/:id`                 | Delete session (cascades)   |
-| POST   | `/sessions/:id/questions`       | Add question                |
-| GET    | `/sessions/:id/questions`       | List questions              |
-| PUT    | `/questions/:id`                | Update question             |
-| DELETE | `/questions/:id`                | Delete question             |
-| GET    | `/sessions/:id/participants`    | List participants           |
-| GET    | `/sessions/:id/leaderboard`     | Admin leaderboard view      |
-| GET    | `/sessions/:id/export`          | Export results as CSV       |
-
-### Quiz (`/api/quiz`) — Student only
-| Method | Endpoint                       | Description                  |
-|:-------|:-------------------------------|:-----------------------------|
-| GET    | `/sessions`                    | List live sessions           |
-| POST   | `/sessions/join`               | Join session by join code    |
-| GET    | `/attempts/:id`                | Get submitted attempt result |
-| POST   | `/attempts/:id/submit`         | Submit quiz answers          |
-
-### Leaderboard (`/api/leaderboard`) — Any authenticated user
-| Method | Endpoint         | Description                |
-|:-------|:-----------------|:---------------------------|
-| GET    | `/sessions/:id`  | Ranked leaderboard         |
+4. **`get_attempt_result(p_attempt_id)`**:
+   - Delivers the full question breakdown, user selections, and verified solutions after completion.
 
 ---
 
-## Key Features
+## 👑 Instructor & Admin Access
 
-### Security & Integrity
-- ✅ Passwords hashed with **bcrypt** (12 rounds)
-- ✅ **JWT** tokens with configurable expiration
-- ✅ Correct answers **never sent to frontend** during quiz
-- ✅ All grading performed **server-side** on submission
-- ✅ Server-side `started_at` and `submitted_at` timestamps
-- ✅ Parameterized SQL queries (SQL injection prevention)
-- ✅ Helmet, CORS, and rate limiting middleware
+### Accessing the Admin Workspace
+- Direct URL: **http://localhost:3000/admin/login**
+- From the student login page: click **"Administrator? Use the admin portal"**.
 
-### Concurrency (100+ Users)
-- ✅ **UNIQUE constraint** on `(session_id, student_id)` prevents duplicate attempts
-- ✅ **UNIQUE constraint** on `(attempt_id, question_id)` prevents duplicate answers
-- ✅ **Database indexes** on leaderboard sort columns `(session_id, score DESC, time_taken_ms ASC)`
-- ✅ **Connection pool** with 20 max connections
-- ✅ Transaction-based submission with `BEGIN / COMMIT / ROLLBACK`
-- ✅ Upsert (`ON CONFLICT`) for idempotent answer insertion
-
-### Leaderboard Sorting
-1. **Primary**: Score descending (highest first)
-2. **Tie-breaker**: Time taken ascending (fastest first)
-
-### Timer Enforcement
-- Server records `started_at` on join
-- Client countdown derived from `server_started_at` + `duration_minutes`
-- Auto-submit on timer expiry
-- Time capped at max duration (never rejected for overtime)
+### Registering an Instructor Account
+1. **Via UI**: Visit `/admin/register`. Enter your name, email, password, and the **Admin Secret Key** (`Admin@CloudQuest2026` by default).
+2. **Via Supabase SQL Editor**: Promote any registered user account instantly:
+   ```sql
+   UPDATE public.profiles SET role = 'admin' WHERE email = 'your_email@gmail.com';
+   ```
 
 ---
 
-## Deployment
+## 🌐 Production Deployment (Vercel)
 
-### Production Build (Frontend)
+This application is optimized for **Vercel**:
 
-```bash
-cd frontend
-npm run build
-npm start
-# → Serves production Next.js on port 3000
-```
-
-### Production (Backend)
-
-```bash
-cd backend
-NODE_ENV=production node server.js
-```
-
-### Docker / Cloud Deployment
-
-For PostgreSQL, use managed services:
-- **Supabase**: `DATABASE_URL=postgresql://...@db.xxx.supabase.co:5432/postgres`
-- **Neon**: `DATABASE_URL=postgresql://...@ep-xxx.us-east-2.aws.neon.tech/quizapp`
-- **Railway**: Auto-provisioned `DATABASE_URL`
-
-Deploy the backend and frontend as separate services (e.g., Railway, Render, Fly.io), or combine with Docker Compose.
-
-Set `FRONTEND_URL` on the backend to your deployed frontend domain for CORS.
+1. Push your repository to **GitHub**.
+2. Import the project into **Vercel**:
+   - **Root Directory**: `frontend`
+   - **Framework Preset**: Next.js
+3. In **Settings $\rightarrow$ Environment Variables**, add:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `NEXT_PUBLIC_ADMIN_SECRET_KEY`
+4. Deploy! Vercel builds the static and dynamic pages with automatic edge CDN routing.
 
 ---
 
-## License
+## 🎨 Theme & UI Highlights
 
-MIT
+- **Kawaii Cloud Doodles & Dot-Matrix Grid**: Inspired by the Figma Make CloudQuest design system.
+- **Dark / Light Mode**: Floating theme switcher with seamless persistence and color adaptation across all hero cards, buttons, matrices, and footers.
+- **Tiebreaker Podium**: Top 3 finishers receive Gold 🥇, Silver 🥈, and Bronze 🥉 podium cards with time callouts, followed by the comprehensive class rankings table.
+
+---
+
+## 💖 Credits
+
+Made with ♡ by **Soumili & Swarnendu**
+
+Licensed under the [MIT License](LICENSE).
