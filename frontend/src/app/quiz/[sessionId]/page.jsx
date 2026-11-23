@@ -156,9 +156,11 @@ function QuizPlayContent() {
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem(`quiz_answers_${sessionId}`);
         sessionStorage.removeItem(`quiz_data_${sessionId}`);
-        if (res) {
-          sessionStorage.setItem(`quiz_result_${attemptId}`, JSON.stringify(res));
-        }
+        // Cache the result for the Results page
+        sessionStorage.setItem(
+          `quiz_result_${attemptId}`,
+          JSON.stringify({ ...res.data, session_id: sessionId })
+        );
       }
 
       toast.success('Quiz submitted successfully!');
