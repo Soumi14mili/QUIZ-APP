@@ -19,6 +19,7 @@ import {
   FiLayers,
   FiCheckCircle,
   FiShare2,
+  FiSliders,
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
@@ -120,12 +121,17 @@ function AdminDashboardContent() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
-      {/* Top Banner & Stats */}
+      {/* Top Banner & Title */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Admin Dashboard</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Manage your quizzes, questions, monitor live attempts, and export results
+          <span className="inline-block px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-[#b5e7d2] text-[#173c34] border border-[#173c34] mb-2">
+            Instructor Console
+          </span>
+          <h1 className="font-display text-3xl sm:text-4xl font-normal text-[#173c34] tracking-tight">
+            Session & Question Manager
+          </h1>
+          <p className="text-sm text-[#173c34]/70 mt-1">
+            Author and orchestrate live quiz arenas, manage question pools, and inspect rankings
           </p>
         </div>
 
@@ -134,72 +140,72 @@ function AdminDashboardContent() {
             setSelectedSessionForEdit(null);
             setIsFormOpen(true);
           }}
-          className="inline-flex items-center space-x-2 px-5 py-3 rounded-2xl font-semibold text-sm text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-200 transition-all flex-shrink-0"
+          className="inline-flex items-center space-x-2 px-6 py-3 rounded-full font-bold text-xs uppercase tracking-wider text-white bg-[#e65f45] hover:-translate-y-0.5 active:translate-y-0 border-2 border-[#173c34] shadow-[0_4px_0_#a83a29] transition-all flex-shrink-0"
         >
-          <FiPlus className="w-5 h-5" />
+          <FiPlus className="w-4 h-4" />
           <span>Create New Session</span>
         </button>
       </div>
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex items-center justify-between">
+        <div className="bg-white rounded-[2rem] p-6 border-2 border-[#173c34] shadow-[6px_6px_0_#173c34] flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Quizzes</p>
-            <p className="text-3xl font-extrabold text-slate-900 mt-1">{sessions.length}</p>
-            <p className="text-xs text-indigo-600 mt-1 font-medium">{draftCount} draft sessions</p>
+            <p className="text-[11px] font-black uppercase tracking-wider text-[#173c34]/70">Total Sessions</p>
+            <p className="font-display text-3xl sm:text-4xl font-bold text-[#173c34] mt-1">{sessions.length}</p>
+            <p className="text-xs text-[#173c34]/70 mt-1 font-semibold">{draftCount} in draft</p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-[#f7f4ec] border-2 border-[#173c34] text-[#173c34] flex items-center justify-center shadow-[2px_2px_0_#173c34]">
             <FiLayers className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex items-center justify-between">
+        <div className="bg-[#b5e7d2] rounded-[2rem] p-6 border-2 border-[#173c34] shadow-[6px_6px_0_#173c34] text-[#173c34] flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Live Quizzes</p>
-            <p className="text-3xl font-extrabold text-emerald-600 mt-1">{liveCount}</p>
-            <p className="text-xs text-slate-400 mt-1 font-medium">Accepting students</p>
+            <p className="text-[11px] font-black uppercase tracking-wider opacity-80">Live Now</p>
+            <p className="font-display text-3xl sm:text-4xl font-bold text-[#173c34] mt-1">{liveCount}</p>
+            <p className="text-xs font-semibold opacity-80 mt-1">Accepting answers</p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <FiCheckCircle className="w-6 h-6" />
+          <div className="w-12 h-12 rounded-2xl bg-white border-2 border-[#173c34] text-[#173c34] flex items-center justify-center shadow-[2px_2px_0_#173c34]">
+            <FiCheckCircle className="w-6 h-6 text-[#236653]" />
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex items-center justify-between">
+        <div className="bg-[#f7b955] rounded-[2rem] p-6 border-2 border-[#173c34] shadow-[6px_6px_0_#173c34] text-[#173c34] flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Participants</p>
-            <p className="text-3xl font-extrabold text-slate-900 mt-1">{totalParticipants}</p>
-            <p className="text-xs text-slate-400 mt-1 font-medium">Across all sessions</p>
+            <p className="text-[11px] font-black uppercase tracking-wider opacity-80">Total Submissions</p>
+            <p className="font-display text-3xl sm:text-4xl font-bold text-[#173c34] mt-1">{totalParticipants}</p>
+            <p className="text-xs font-semibold opacity-80 mt-1">Across all cohorts</p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
-            <FiUsers className="w-6 h-6" />
+          <div className="w-12 h-12 rounded-2xl bg-white border-2 border-[#173c34] text-[#173c34] flex items-center justify-center shadow-[2px_2px_0_#173c34]">
+            <FiUsers className="w-6 h-6 text-[#173c34]" />
           </div>
         </div>
       </div>
 
       {/* Controls & Search */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border-2 border-[#173c34] shadow-[4px_4px_0_#173c34]">
         <div className="relative w-full sm:w-80">
-          <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173c34]/50" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by title or join code..."
-            className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 text-sm focus:border-indigo-600 text-slate-900"
+            placeholder="Search by title or code..."
+            className="w-full pl-9 pr-4 py-2 rounded-xl border-2 border-[#173c34] text-xs font-medium focus:outline-none focus:shadow-[3px_3px_0_#173c34] text-[#173c34]"
           />
         </div>
 
         {/* Status Filter Buttons */}
-        <div className="flex items-center space-x-1 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+        <div className="flex items-center space-x-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
           {['All', 'Live', 'Draft', 'Ended'].map((status) => (
             <button
               key={status}
               onClick={() => setFilterStatus(status)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors flex-shrink-0 ${
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border border-[#173c34] flex-shrink-0 ${
                 filterStatus === status
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-100'
+                  ? 'bg-[#173c34] text-white shadow-[2px_2px_0_#e65f45]'
+                  : 'bg-white text-[#173c34] hover:bg-[#eef3f0]'
               }`}
             >
               {status}
@@ -210,16 +216,16 @@ function AdminDashboardContent() {
 
       {/* Sessions Grid */}
       {loading ? (
-        <div className="py-16 bg-white rounded-3xl border border-slate-200 flex items-center justify-center">
-          <LoadingSpinner message="Loading quiz sessions..." />
+        <div className="py-16 bg-white rounded-[2rem] border-2 border-[#173c34] shadow-[6px_6px_0_#173c34] flex items-center justify-center">
+          <LoadingSpinner message="Scanning sessions repository..." />
         </div>
       ) : filteredSessions.length === 0 ? (
-        <div className="text-center py-16 px-4 bg-white rounded-3xl border border-slate-200 space-y-4">
-          <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
-            <FiLayers className="w-6 h-6" />
+        <div className="text-center py-16 px-6 bg-white rounded-[2rem] border-2 border-[#173c34] shadow-[6px_6px_0_#173c34] space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-[#f7f4ec] border-2 border-[#173c34] text-[#173c34] flex items-center justify-center mx-auto shadow-[3px_3px_0_#173c34]">
+            <FiLayers className="w-7 h-7" />
           </div>
-          <h3 className="text-lg font-bold text-slate-800">No sessions found</h3>
-          <p className="text-sm text-slate-500 max-w-sm mx-auto">
+          <h3 className="font-display text-xl font-bold text-[#173c34]">No sessions found</h3>
+          <p className="text-xs sm:text-sm text-[#173c34]/70 max-w-sm mx-auto">
             {searchQuery || filterStatus !== 'All'
               ? 'No quiz sessions matched your search or status filter.'
               : 'Create your first quiz session to start adding questions and hosting live competitions!'}
@@ -230,7 +236,7 @@ function AdminDashboardContent() {
                 setSelectedSessionForEdit(null);
                 setIsFormOpen(true);
               }}
-              className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-all"
+              className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-full text-xs font-bold text-white bg-[#e65f45] border-2 border-[#173c34] shadow-[0_4px_0_#a83a29] transition-all"
             >
               <FiPlus className="w-4 h-4" />
               <span>Create Session</span>
@@ -243,15 +249,15 @@ function AdminDashboardContent() {
             const sessionId = session.id || session._id;
             const statusColor =
               session.status === 'Live'
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                ? 'bg-[#b5e7d2] text-[#173c34] border-[#173c34]'
                 : session.status === 'Draft'
-                ? 'bg-amber-50 text-amber-700 border-amber-200'
-                : 'bg-slate-100 text-slate-600 border-slate-200';
+                ? 'bg-[#f7b955] text-[#173c34] border-[#173c34]'
+                : 'bg-[#eef3f0] text-[#173c34] border-[#173c34]';
 
             return (
               <div
                 key={sessionId}
-                className="bg-white rounded-3xl p-6 border border-slate-200 hover:border-indigo-300 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                className="bg-white rounded-[2rem] p-6 border-2 border-[#173c34] shadow-[6px_6px_0_#173c34] hover:shadow-[10px_10px_0_#173c34] transition-all flex flex-col justify-between"
               >
                 <div className="space-y-4">
                   {/* Card Header */}
@@ -261,7 +267,7 @@ function AdminDashboardContent() {
                       <select
                         value={session.status || 'Draft'}
                         onChange={(e) => handleStatusChange(session, e.target.value)}
-                        className={`text-xs font-semibold px-2.5 py-1 rounded-full border cursor-pointer ${statusColor}`}
+                        className={`text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full border-2 cursor-pointer focus:outline-none ${statusColor}`}
                       >
                         <option value="Draft">Draft</option>
                         <option value="Live">Live</option>
@@ -276,44 +282,44 @@ function AdminDashboardContent() {
                           toast.success(`Copied join code: ${session.join_code}`);
                         }}
                         title="Click to copy join code"
-                        className="inline-flex items-center space-x-1 text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 transition-colors"
+                        className="inline-flex items-center space-x-1.5 text-xs font-mono font-black px-2.5 py-1 rounded-lg bg-[#f7f4ec] hover:bg-[#ffb6aa] text-[#173c34] border border-[#173c34] transition-colors"
                       >
                         <span>{session.join_code}</span>
-                        <FiShare2 className="w-3 h-3 text-indigo-500" />
+                        <FiShare2 className="w-3 h-3 text-[#e65f45]" />
                       </button>
                     )}
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-bold text-slate-900 line-clamp-1">{session.title}</h3>
-                    <p className="text-sm text-slate-500 mt-1 line-clamp-2">
+                    <h3 className="font-display text-xl font-bold text-[#173c34] line-clamp-1">{session.title}</h3>
+                    <p className="text-xs text-[#173c34]/70 mt-1 line-clamp-2 leading-relaxed">
                       {session.description || 'No description provided.'}
                     </p>
                   </div>
 
                   {/* Metadata pill counters */}
-                  <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-100 text-xs text-slate-600">
-                    <div className="flex flex-col items-center bg-slate-50 p-2 rounded-xl">
-                      <span className="text-[10px] uppercase font-semibold text-slate-400">Duration</span>
-                      <span className="font-bold text-slate-800 mt-0.5">{session.duration_minutes}m</span>
+                  <div className="grid grid-cols-3 gap-2 pt-3 border-t border-[#173c34]/10 text-xs text-[#173c34]">
+                    <div className="flex flex-col items-center bg-[#fdfbf7] p-2 rounded-xl border border-[#173c34]/15">
+                      <span className="text-[10px] uppercase font-bold text-[#173c34]/60">Duration</span>
+                      <span className="font-display font-bold text-sm text-[#173c34] mt-0.5">{session.duration_minutes}m</span>
                     </div>
-                    <div className="flex flex-col items-center bg-slate-50 p-2 rounded-xl">
-                      <span className="text-[10px] uppercase font-semibold text-slate-400">Questions</span>
-                      <span className="font-bold text-slate-800 mt-0.5">{session.question_count || 0}</span>
+                    <div className="flex flex-col items-center bg-[#fdfbf7] p-2 rounded-xl border border-[#173c34]/15">
+                      <span className="text-[10px] uppercase font-bold text-[#173c34]/60">Questions</span>
+                      <span className="font-display font-bold text-sm text-[#173c34] mt-0.5">{session.question_count || 0}</span>
                     </div>
-                    <div className="flex flex-col items-center bg-slate-50 p-2 rounded-xl">
-                      <span className="text-[10px] uppercase font-semibold text-slate-400">Students</span>
-                      <span className="font-bold text-slate-800 mt-0.5">{session.participant_count || 0}</span>
+                    <div className="flex flex-col items-center bg-[#fdfbf7] p-2 rounded-xl border border-[#173c34]/15">
+                      <span className="text-[10px] uppercase font-bold text-[#173c34]/60">Students</span>
+                      <span className="font-display font-bold text-sm text-[#173c34] mt-0.5">{session.participant_count || 0}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Card Actions */}
-                <div className="mt-6 pt-4 border-t border-slate-100 space-y-2">
+                <div className="mt-6 pt-4 border-t border-[#173c34]/10 space-y-2">
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => router.push(`/admin/sessions/${sessionId}/questions`)}
-                      className="flex-1 py-2 px-3 rounded-xl text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors flex items-center justify-center space-x-1.5"
+                      className="flex-1 py-2 px-3 rounded-full text-xs font-bold text-white bg-[#173c34] hover:-translate-y-0.5 border-2 border-[#173c34] shadow-[0_3px_0_#0d2923] transition-all flex items-center justify-center space-x-1.5"
                     >
                       <FiHelpCircle className="w-3.5 h-3.5" />
                       <span>Manage Questions</span>
@@ -322,7 +328,7 @@ function AdminDashboardContent() {
                     <button
                       onClick={() => router.push(`/leaderboard/${sessionId}`)}
                       title="View Leaderboard"
-                      className="p-2 rounded-xl text-slate-600 hover:text-indigo-600 hover:bg-slate-100 border border-slate-200 transition-colors"
+                      className="w-9 h-9 rounded-full border-2 border-[#173c34] bg-[#f7b955] text-[#173c34] hover:-translate-y-0.5 shadow-[2px_2px_0_#173c34] flex items-center justify-center transition-all flex-shrink-0"
                     >
                       <FiAward className="w-4 h-4" />
                     </button>
@@ -330,7 +336,7 @@ function AdminDashboardContent() {
                     <button
                       onClick={() => handleExportCSV(sessionId, session.title)}
                       title="Export CSV Report"
-                      className="p-2 rounded-xl text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-200 transition-colors"
+                      className="w-9 h-9 rounded-full border-2 border-[#173c34] bg-[#b5e7d2] text-[#173c34] hover:-translate-y-0.5 shadow-[2px_2px_0_#173c34] flex items-center justify-center transition-all flex-shrink-0"
                     >
                       <FiDownload className="w-4 h-4" />
                     </button>
@@ -342,17 +348,17 @@ function AdminDashboardContent() {
                         setSelectedSessionForEdit(session);
                         setIsFormOpen(true);
                       }}
-                      className="flex-1 py-1.5 px-3 rounded-xl text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-colors flex items-center justify-center space-x-1"
+                      className="flex-1 py-1.5 px-3 rounded-full text-xs font-bold text-[#173c34] bg-white hover:bg-[#eef3f0] border-2 border-[#173c34] shadow-[1px_1px_0_#173c34] transition-all flex items-center justify-center space-x-1"
                     >
-                      <FiEdit className="w-3.5 h-3.5" />
+                      <FiEdit className="w-3 h-3" />
                       <span>Edit</span>
                     </button>
 
                     <button
                       onClick={() => handleDelete(sessionId, session.title)}
-                      className="flex-1 py-1.5 px-3 rounded-xl text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-rose-200 transition-colors flex items-center justify-center space-x-1"
+                      className="flex-1 py-1.5 px-3 rounded-full text-xs font-bold text-[#e65f45] bg-[#fff0ed] hover:bg-[#ffb6aa] border-2 border-[#e65f45] shadow-[1px_1px_0_#e65f45] transition-all flex items-center justify-center space-x-1"
                     >
-                      <FiTrash2 className="w-3.5 h-3.5" />
+                      <FiTrash2 className="w-3 h-3" />
                       <span>Delete</span>
                     </button>
                   </div>

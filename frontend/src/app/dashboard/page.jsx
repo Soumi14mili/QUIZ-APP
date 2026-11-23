@@ -15,6 +15,7 @@ import {
   FiRefreshCw,
   FiCheckCircle,
   FiArrowRight,
+  FiZap,
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
@@ -60,7 +61,6 @@ function StudentDashboardContent() {
       const { attempt, session, questions } = res.data;
 
       const sessionId = session.id || session._id;
-      // Store in sessionStorage for resilient Next.js client retrieval
       if (typeof window !== 'undefined') {
         sessionStorage.setItem(
           `quiz_data_${sessionId}`,
@@ -83,29 +83,32 @@ function StudentDashboardContent() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-700 rounded-3xl p-6 sm:p-10 text-white shadow-xl shadow-indigo-200">
-        <div className="max-w-3xl space-y-3">
-          <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold uppercase tracking-wider text-indigo-100">
-            Student Dashboard
+      <div className="relative overflow-hidden bg-[#173c34] rounded-[2.5rem] p-8 sm:p-12 text-[#f7f4ec] border-3 border-[#173c34] shadow-[10px_10px_0_#f7b955]">
+        <div className="max-w-3xl space-y-4">
+          <span className="inline-flex items-center space-x-2 px-3.5 py-1.5 bg-[#b5e7d2] text-[#173c34] rounded-full text-xs font-black uppercase tracking-wider border border-[#173c34]">
+            <FiZap className="w-3.5 h-3.5 text-[#e65f45]" />
+            <span>Learner Arena</span>
           </span>
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
-            Welcome back, {user?.full_name || 'Student'}! 👋
+
+          <h1 className="font-display text-3xl sm:text-5xl font-normal tracking-tight text-white leading-tight">
+            Welcome back, <span className="text-[#f7b955]">{user?.full_name?.split(' ')[0] || 'Architect'}</span>!
           </h1>
-          <p className="text-indigo-100 text-sm sm:text-base leading-relaxed">
-            Ready to challenge yourself? Enter a quiz code from your instructor or pick an active quiz below to begin.
+
+          <p className="text-[#f7f4ec]/85 text-sm sm:text-base leading-relaxed max-w-2xl">
+            Test your cloud architecture skills under pressure. Enter your room join code below or select an open live session to challenge the leaderboard.
           </p>
         </div>
       </div>
 
       {/* Section 1: Join Quiz by Code */}
-      <section className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+      <section className="bg-white rounded-[2.25rem] p-6 sm:p-9 border-2 border-[#173c34] shadow-[8px_8px_0_#173c34]">
         <div className="max-w-xl">
-          <div className="flex items-center space-x-2.5 text-indigo-600 mb-2">
+          <div className="flex items-center space-x-2 text-[#e65f45] mb-2">
             <FiHash className="w-5 h-5" />
-            <h2 className="text-lg font-bold text-slate-900">Have a Quiz Code?</h2>
+            <h2 className="font-display text-xl font-bold text-[#173c34]">Got a Quiz Join Code?</h2>
           </div>
-          <p className="text-sm text-slate-500 mb-6">
-            Enter the 6-character room code provided by your instructor or host.
+          <p className="text-sm text-[#173c34]/70 mb-6">
+            Enter the 6-character room code provided by your instructor or host to jump straight in.
           </p>
 
           <form
@@ -113,7 +116,7 @@ function StudentDashboardContent() {
               e.preventDefault();
               handleJoinQuiz(joinCode);
             }}
-            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
+            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5"
           >
             <div className="relative flex-1">
               <input
@@ -122,19 +125,19 @@ function StudentDashboardContent() {
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                 placeholder="e.g. QZ-4892"
-                className="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-300 focus:border-indigo-600 text-slate-900 font-mono font-bold tracking-widest uppercase text-base placeholder-slate-400 placeholder:tracking-normal placeholder:font-sans transition-colors"
+                className="w-full px-5 py-3.5 rounded-2xl border-2 border-[#173c34] bg-[#fdfbf7] text-[#173c34] font-mono font-bold tracking-widest uppercase text-base placeholder-[#173c34]/40 focus:outline-none focus:shadow-[4px_4px_0_#173c34] transition-all"
               />
             </div>
             <button
               type="submit"
               disabled={joining || !joinCode.trim()}
-              className="py-3.5 px-7 rounded-2xl font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-indigo-200 transition-all flex items-center justify-center space-x-2 flex-shrink-0"
+              className="py-3.5 px-8 rounded-full font-bold text-white bg-[#e65f45] hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-[#173c34] shadow-[0_5px_0_#a83a29] transition-all flex items-center justify-center space-x-2 flex-shrink-0"
             >
               {joining ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
                 <>
-                  <span>Join Quiz</span>
+                  <span>Join Session</span>
                   <FiArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -147,32 +150,34 @@ function StudentDashboardContent() {
       <section id="quizzes" className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Available Live Quizzes</h2>
-            <p className="text-sm text-slate-500">Live sessions currently accepting participants</p>
+            <h2 className="font-display text-2xl sm:text-3xl font-normal text-[#173c34]">
+              Available Live Quizzes
+            </h2>
+            <p className="text-sm text-[#173c34]/70">Live sessions currently accepting submissions</p>
           </div>
 
           <button
             onClick={() => fetchSessions(true)}
             disabled={refreshing || loading}
-            className="inline-flex items-center space-x-2 px-3.5 py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 border border-slate-200 transition-colors"
+            className="inline-flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-bold text-[#173c34] bg-white hover:bg-[#eef3f0] border-2 border-[#173c34] shadow-[2px_2px_0_#173c34] transition-all"
           >
-            <FiRefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-indigo-600' : ''}`} />
+            <FiRefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-[#e65f45]' : ''}`} />
             <span>Refresh</span>
           </button>
         </div>
 
         {loading ? (
-          <div className="py-12 bg-white rounded-3xl border border-slate-200 flex items-center justify-center">
-            <LoadingSpinner message="Loading live quizzes..." />
+          <div className="py-16 bg-white rounded-[2.25rem] border-2 border-[#173c34] shadow-[6px_6px_0_#173c34] flex items-center justify-center">
+            <LoadingSpinner message="Scanning active sessions..." />
           </div>
         ) : sessions.length === 0 ? (
-          <div className="text-center py-16 px-4 bg-white rounded-3xl border border-slate-200 space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
-              <FiHelpCircle className="w-6 h-6" />
+          <div className="text-center py-16 px-6 bg-white rounded-[2.25rem] border-2 border-[#173c34] shadow-[6px_6px_0_#173c34] space-y-4">
+            <div className="w-14 h-14 rounded-2xl bg-[#f7f4ec] border-2 border-[#173c34] text-[#173c34] flex items-center justify-center mx-auto shadow-[3px_3px_0_#173c34]">
+              <FiHelpCircle className="w-7 h-7" />
             </div>
-            <h3 className="text-lg font-semibold text-slate-800">No active quizzes right now</h3>
-            <p className="text-sm text-slate-500 max-w-md mx-auto">
-              There are no live quiz sessions open at the moment. Ask your instructor for a session join code or check back later!
+            <h3 className="font-display text-xl font-bold text-[#173c34]">No active quizzes right now</h3>
+            <p className="text-sm text-[#173c34]/70 max-w-md mx-auto">
+              There are no public quiz sessions open at the moment. Ask your instructor for a session join code or check back soon!
             </p>
           </div>
         ) : (
@@ -185,57 +190,57 @@ function StudentDashboardContent() {
               return (
                 <div
                   key={sessionId}
-                  className="bg-white rounded-3xl p-6 border border-slate-200 hover:border-indigo-300 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                  className="bg-white rounded-[2rem] p-6 sm:p-7 border-2 border-[#173c34] shadow-[6px_6px_0_#173c34] hover:shadow-[10px_10px_0_#173c34] transition-all flex flex-col justify-between"
                 >
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-[#b5e7d2] text-[#173c34] border border-[#173c34]">
+                        <span className="w-2 h-2 rounded-full bg-[#173c34] mr-1.5 animate-pulse" />
                         Live Now
                       </span>
                       {session.join_code && (
-                        <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600">
+                        <span className="text-xs font-mono font-black px-2.5 py-1 rounded-lg bg-[#f7b955] text-[#173c34] border border-[#173c34]">
                           {session.join_code}
                         </span>
                       )}
                     </div>
 
                     <div>
-                      <h3 className="text-lg font-bold text-slate-900 group-hover:text-indigo-600 line-clamp-1">
+                      <h3 className="font-display text-xl font-bold text-[#173c34] line-clamp-1">
                         {session.title}
                       </h3>
-                      <p className="text-sm text-slate-500 mt-1 line-clamp-2">
+                      <p className="text-xs sm:text-sm text-[#173c34]/70 mt-1.5 line-clamp-2 leading-relaxed">
                         {session.description || 'No description provided.'}
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs text-slate-600">
+                    <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[#173c34]/10 text-xs font-semibold text-[#173c34]/80">
                       <div className="flex items-center space-x-1.5">
-                        <FiClock className="w-4 h-4 text-slate-400" />
+                        <FiClock className="w-4 h-4 text-[#e65f45]" />
                         <span>{session.duration_minutes || 10} Mins</span>
                       </div>
                       <div className="flex items-center space-x-1.5">
-                        <FiHelpCircle className="w-4 h-4 text-slate-400" />
+                        <FiHelpCircle className="w-4 h-4 text-[#173c34]" />
                         <span>{session.question_count || 0} Questions</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-2">
+                  <div className="mt-6 pt-4 border-t border-[#173c34]/10 flex items-center gap-2.5">
                     {hasAttempted && attemptId ? (
                       <button
                         onClick={() => router.push(`/results/${attemptId}`)}
-                        className="flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors flex items-center justify-center space-x-1.5"
+                        className="flex-1 py-2.5 px-4 rounded-full text-xs font-bold text-[#173c34] bg-[#b5e7d2] hover:-translate-y-0.5 border-2 border-[#173c34] shadow-[0_3px_0_#236653] transition-all flex items-center justify-center space-x-1.5"
                       >
-                        <FiCheckCircle className="w-4 h-4" />
+                        <FiCheckCircle className="w-4 h-4 text-[#173c34]" />
                         <span>View Results</span>
                       </button>
                     ) : (
                       <button
                         onClick={() => handleJoinQuiz(session.join_code)}
-                        className="flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-sm flex items-center justify-center space-x-1.5"
+                        className="flex-1 py-2.5 px-4 rounded-full text-xs font-bold text-white bg-[#e65f45] hover:-translate-y-0.5 active:translate-y-0 border-2 border-[#173c34] shadow-[0_3px_0_#a83a29] transition-all flex items-center justify-center space-x-1.5"
                       >
-                        <FiPlay className="w-4 h-4" />
+                        <FiPlay className="w-3.5 h-3.5" />
                         <span>Start Quiz</span>
                       </button>
                     )}
@@ -243,7 +248,7 @@ function StudentDashboardContent() {
                     <button
                       onClick={() => router.push(`/leaderboard/${sessionId}`)}
                       title="View Leaderboard"
-                      className="p-2.5 rounded-xl text-slate-600 hover:text-indigo-600 hover:bg-slate-100 border border-slate-200 transition-colors"
+                      className="w-10 h-10 rounded-full border-2 border-[#173c34] bg-[#f7b955] text-[#173c34] hover:-translate-y-0.5 shadow-[2px_2px_0_#173c34] flex items-center justify-center transition-all flex-shrink-0"
                     >
                       <FiAward className="w-4 h-4" />
                     </button>

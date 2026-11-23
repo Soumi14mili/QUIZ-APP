@@ -21,71 +21,72 @@ const ResultCard = ({
 
   const wasAnswered = selectedOption !== null && selectedOption !== undefined;
 
+  let cardBg = 'bg-white';
+  let cardBorder = 'border-2 border-[#173c34] shadow-[6px_6px_0_#173c34]';
+
+  if (isCorrect) {
+    cardBg = 'bg-[#f4f9f6]';
+  } else if (wasAnswered) {
+    cardBg = 'bg-[#fff5f2]';
+  }
+
   return (
-    <div
-      className={`bg-white rounded-2xl p-6 sm:p-8 border shadow-sm transition-all ${
-        isCorrect
-          ? 'border-emerald-200 bg-emerald-50/20'
-          : wasAnswered
-          ? 'border-rose-200 bg-rose-50/20'
-          : 'border-slate-200'
-      }`}
-    >
+    <div className={`${cardBg} rounded-[2rem] p-6 sm:p-8 ${cardBorder} transition-all`}>
       {/* Header with question number and status badge */}
-      <div className="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
+      <div className="flex items-center justify-between pb-4 mb-5 border-b border-[#173c34]/10">
+        <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-white text-[#173c34] border border-[#173c34] shadow-[2px_2px_0_#173c34]">
           Question {questionNumber}
         </span>
 
         {isCorrect ? (
-          <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-            <FiCheck className="w-3.5 h-3.5" />
+          <span className="inline-flex items-center space-x-1.5 px-3.5 py-1 rounded-full text-xs font-bold bg-[#b5e7d2] text-[#173c34] border-2 border-[#173c34] shadow-[2px_2px_0_#173c34]">
+            <FiCheck className="w-4 h-4 text-[#173c34]" />
             <span>Correct (+1)</span>
           </span>
         ) : wasAnswered ? (
-          <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">
-            <FiX className="w-3.5 h-3.5" />
+          <span className="inline-flex items-center space-x-1.5 px-3.5 py-1 rounded-full text-xs font-bold bg-[#ffb6aa] text-[#173c34] border-2 border-[#173c34] shadow-[2px_2px_0_#173c34]">
+            <FiX className="w-4 h-4 text-[#e65f45]" />
             <span>Incorrect</span>
           </span>
         ) : (
-          <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
-            <FiHelpCircle className="w-3.5 h-3.5" />
+          <span className="inline-flex items-center space-x-1.5 px-3.5 py-1 rounded-full text-xs font-bold bg-[#f7b955] text-[#173c34] border-2 border-[#173c34] shadow-[2px_2px_0_#173c34]">
+            <FiHelpCircle className="w-4 h-4 text-[#173c34]" />
             <span>Unanswered</span>
           </span>
         )}
       </div>
 
       {/* Question Text */}
-      <h3 className="text-lg sm:text-xl font-semibold text-slate-800 leading-relaxed mb-6">
+      <h3 className="font-display text-lg sm:text-xl text-[#173c34] font-normal leading-relaxed mb-6">
         {question.question_text}
       </h3>
 
-      {/* Options List with status decoration */}
+      {/* Options List */}
       <div className="space-y-3">
         {options.map((opt) => {
           const isThisSelected = selectedOption === opt.key;
           const isThisCorrect = correctOption === opt.key;
 
-          let optionStyle = 'border-slate-200 bg-slate-50/50 text-slate-700';
+          let optionStyle = 'border-[#d9ded8] bg-white text-[#173c34]';
           let badgeLabel = null;
           let badgeStyle = '';
           let icon = null;
 
           if (isThisCorrect && isThisSelected) {
-            optionStyle = 'border-emerald-500 bg-emerald-50 text-emerald-950 ring-2 ring-emerald-500/30';
+            optionStyle = 'border-2 border-[#236653] bg-[#e8f5ef] text-[#173c34] shadow-[3px_3px_0_#236653] font-semibold';
             badgeLabel = 'Your Answer (Correct)';
-            badgeStyle = 'bg-emerald-600 text-white';
-            icon = <FiCheck className="w-4 h-4 text-emerald-600" />;
+            badgeStyle = 'bg-[#236653] text-white';
+            icon = <FiCheck className="w-4 h-4 text-[#236653]" />;
           } else if (isThisCorrect && !isThisSelected) {
-            optionStyle = 'border-emerald-500 bg-emerald-50 text-emerald-950 ring-2 ring-emerald-500/20';
+            optionStyle = 'border-2 border-[#236653] bg-[#e8f5ef] text-[#173c34] shadow-[3px_3px_0_#236653] font-semibold';
             badgeLabel = 'Correct Answer';
-            badgeStyle = 'bg-emerald-600 text-white';
-            icon = <FiCheck className="w-4 h-4 text-emerald-600" />;
+            badgeStyle = 'bg-[#236653] text-white';
+            icon = <FiCheck className="w-4 h-4 text-[#236653]" />;
           } else if (isThisSelected && !isThisCorrect) {
-            optionStyle = 'border-rose-400 bg-rose-50 text-rose-950 ring-2 ring-rose-400/20';
+            optionStyle = 'border-2 border-[#e65f45] bg-[#fff0ed] text-[#173c34] shadow-[3px_3px_0_#e65f45]';
             badgeLabel = 'Your Answer (Incorrect)';
-            badgeStyle = 'bg-rose-600 text-white';
-            icon = <FiX className="w-4 h-4 text-rose-600" />;
+            badgeStyle = 'bg-[#e65f45] text-white';
+            icon = <FiX className="w-4 h-4 text-[#e65f45]" />;
           }
 
           return (
@@ -95,25 +96,23 @@ const ResultCard = ({
             >
               <div className="flex items-start space-x-3.5 flex-1 mr-3">
                 <div
-                  className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0 ${
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center font-display font-bold text-xs flex-shrink-0 border ${
                     isThisCorrect
-                      ? 'bg-emerald-200 text-emerald-900'
+                      ? 'border-[#236653] bg-[#b5e7d2] text-[#173c34]'
                       : isThisSelected
-                      ? 'bg-rose-200 text-rose-900'
-                      : 'bg-slate-200 text-slate-700'
+                      ? 'border-[#e65f45] bg-[#ffb6aa] text-[#173c34]'
+                      : 'border-[#173c34]/20 bg-[#f7f4ec] text-[#173c34]'
                   }`}
                 >
                   {opt.key}
                 </div>
-                <div className="font-medium text-sm sm:text-base leading-snug pt-0.5">
-                  {opt.text}
-                </div>
+                <span className="text-sm sm:text-base leading-snug pt-0.5">{opt.text}</span>
               </div>
 
               <div className="flex items-center space-x-2 flex-shrink-0">
                 {badgeLabel && (
                   <span
-                    className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${badgeStyle}`}
+                    className={`hidden sm:inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-bold ${badgeStyle}`}
                   >
                     {badgeLabel}
                   </span>

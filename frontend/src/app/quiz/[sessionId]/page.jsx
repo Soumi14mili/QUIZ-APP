@@ -15,6 +15,7 @@ import {
   FiAlertCircle,
   FiX,
   FiHelpCircle,
+  FiZap,
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
@@ -99,7 +100,7 @@ function QuizPlayContent() {
           router.replace('/dashboard');
         }
       } catch (err) {
-        console.error('Session recovery failed:', err);
+        console.error('Failed to recover quiz session:', err);
         toast.error('Unable to load quiz session');
         router.replace('/dashboard');
       } finally {
@@ -110,24 +111,26 @@ function QuizPlayContent() {
     recoverSession();
   }, [sessionId, router]);
 
-  // Warn before leaving page during active quiz
+  // Warn user on accidental browser reload/navigation
   useEffect(() => {
     const handleBeforeUnload = (e) => {
-      e.preventDefault();
-      e.returnValue = 'You have an active quiz in progress. Are you sure you want to leave?';
-      return e.returnValue;
+      if (!isSubmitting) {
+        e.preventDefault();
+        e.returnValue = 'You have an active quiz session in progress. Leave?';
+        return e.returnValue;
+      }
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, []);
+  }, [isSubmitting]);
 
   const handleSelectOption = (optionKey) => {
-    const currentQ = questions[currentIndex];
-    const qId = currentQ?.id || currentQ?._id;
-    if (!qId) return;
+    const activeQuestion = questions[currentIndex];
+    if (!activeQuestion) return;
+    const qId = activeQuestion.id || activeQuestion._id;
 
     setAnswers((prev) => ({
       ...prev,
@@ -136,17 +139,13 @@ function QuizPlayContent() {
   };
 
   const submitQuiz = useCallback(async () => {
-    const attemptId = attempt?.id || attempt?._id;
-    if (!attemptId) {
-      toast.error('Missing attempt ID. Cannot submit quiz.');
-      return;
-    }
+    if (!attempt || isSubmitting) return;
 
     try {
       setIsSubmitting(true);
       setShowConfirmModal(false);
 
-      const answersPayload = questions.map((q) => {
+      const formattedAnswers = questions.map((q) => {
         const qId = q.id || q._id;
         return {
           question_id: qId,
@@ -154,14 +153,14 @@ function QuizPlayContent() {
         };
       });
 
+      const attemptId = attempt.id || attempt._id;
       const res = await api.post(`/quiz/attempts/${attemptId}/submit`, {
-        answers: answersPayload,
+        answers: formattedAnswers,
       });
 
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem(`quiz_answers_${sessionId}`);
         sessionStorage.removeItem(`quiz_data_${sessionId}`);
-        sessionStorage.setItem(`quiz_result_${attemptId}`, JSON.stringify(res.data));
       }
 
       toast.success('Quiz submitted successfully!');
@@ -172,7 +171,7 @@ function QuizPlayContent() {
       toast.error(msg);
       setIsSubmitting(false);
     }
-  }, [attempt, questions, answers, sessionId, router]);
+  }, [attempt, questions, answers, sessionId, router, isSubmitting]);
 
   const handleTimeUp = useCallback(() => {
     if (!hasAutoSubmittedRef.current) {
@@ -186,20 +185,20 @@ function QuizPlayContent() {
   }, [submitQuiz]);
 
   if (loading) {
-    return <LoadingSpinner fullScreen message="Loading quiz questions..." />;
+    return <LoadingSpinner fullScreen message="Loading quiz arena..." />;
   }
 
   if (!questions || questions.length === 0) {
     return (
       <div className="min-h-[80vh] flex flex-col items-center justify-center p-6 text-center">
-        <FiAlertCircle className="w-12 h-12 text-amber-500 mb-3" />
-        <h2 className="text-xl font-bold text-slate-800">No questions available</h2>
-        <p className="text-sm text-slate-500 mt-1 mb-6">
+        <FiAlertCircle className="w-12 h-12 text-[#e65f45] mb-3" />
+        <h2 className="font-display text-2xl font-bold text-[#173c34]">No questions available</h2>
+        <p className="text-sm text-[#173c34]/70 mt-1 mb-6">
           This quiz session does not have any questions yet.
         </p>
         <button
           onClick={() => router.push('/dashboard')}
-          className="px-5 py-2.5 rounded-xl font-semibold text-sm text-white bg-indigo-600 hover:bg-indigo-700"
+          className="px-6 py-2.5 rounded-full font-bold text-sm text-white bg-[#e65f45] border-2 border-[#173c34] shadow-[0_4px_0_#a83a29]"
         >
           Return to Dashboard
         </button>
@@ -219,20 +218,20 @@ function QuizPlayContent() {
   const startedAt = attempt?.started_at || attempt?.created_at || new Date().toISOString();
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-[#f7f4ec] flex flex-col">
       {/* Sticky Quiz Header & Countdown Timer */}
-      <div className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm py-3 px-4 sm:px-6 lg:px-8">
+      <div className="sticky top-0 z-30 bg-[#f7f4ec]/95 backdrop-blur border-b-2 border-[#173c34] shadow-sm py-3.5 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+            <div className="w-10 h-10 rounded-2xl bg-[#173c34] text-white flex items-center justify-center font-display font-bold text-base border-2 border-[#173c34] shadow-[2px_2px_0_#e65f45]">
               Q
             </div>
             <div>
-              <h1 className="text-base sm:text-lg font-bold text-slate-900 line-clamp-1">
+              <h1 className="font-display text-base sm:text-lg font-bold text-[#173c34] line-clamp-1">
                 {session?.title || 'Live Quiz'}
               </h1>
-              <p className="text-xs text-slate-500 hidden sm:block">
-                Answered {answeredCount} of {questions.length} questions ({progressPercent}%)
+              <p className="text-xs text-[#173c34]/70 hidden sm:block">
+                Answered <span className="font-bold text-[#173c34]">{answeredCount}</span> of {questions.length} questions ({progressPercent}%)
               </p>
             </div>
           </div>
@@ -243,19 +242,19 @@ function QuizPlayContent() {
             <button
               onClick={() => setShowConfirmModal(true)}
               disabled={isSubmitting}
-              className="hidden sm:inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 shadow-sm transition-all flex-shrink-0"
+              className="hidden sm:inline-flex items-center space-x-2 px-5 py-2.5 rounded-full text-xs font-bold text-white bg-[#e65f45] hover:-translate-y-0.5 active:translate-y-0 border-2 border-[#173c34] shadow-[0_4px_0_#a83a29] transition-all flex-shrink-0"
             >
-              <FiSend className="w-4 h-4" />
+              <FiSend className="w-3.5 h-3.5" />
               <span>Submit</span>
             </button>
           </div>
         </div>
 
-        {/* Progress Bar */}
-        <div className="max-w-7xl mx-auto mt-2.5">
-          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+        {/* Progress Bar with Coral fill */}
+        <div className="max-w-7xl mx-auto mt-3">
+          <div className="w-full h-2.5 bg-[#eef3f0] border border-[#173c34]/30 rounded-full overflow-hidden p-0.5">
             <div
-              className="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 transition-all duration-300"
+              className="h-full bg-[#e65f45] rounded-full transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -279,13 +278,13 @@ function QuizPlayContent() {
               type="button"
               disabled={currentIndex === 0}
               onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
-              className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-all"
+              className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-full text-xs font-bold text-[#173c34] bg-white hover:bg-[#eef3f0] border-2 border-[#173c34] shadow-[2px_2px_0_#173c34] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             >
               <FiArrowLeft className="w-4 h-4" />
               <span>Previous</span>
             </button>
 
-            <div className="text-xs font-semibold text-slate-400">
+            <div className="text-xs font-bold font-mono text-[#173c34]/60">
               {currentIndex + 1} / {questions.length}
             </div>
 
@@ -293,7 +292,7 @@ function QuizPlayContent() {
               <button
                 type="button"
                 onClick={() => setShowConfirmModal(true)}
-                className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-200 transition-all"
+                className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-full text-xs font-bold text-white bg-[#e65f45] hover:-translate-y-0.5 border-2 border-[#173c34] shadow-[0_4px_0_#a83a29] transition-all"
               >
                 <span>Submit Quiz</span>
                 <FiSend className="w-4 h-4" />
@@ -302,7 +301,7 @@ function QuizPlayContent() {
               <button
                 type="button"
                 onClick={() => setCurrentIndex((prev) => Math.min(questions.length - 1, prev + 1))}
-                className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-200 transition-all"
+                className="inline-flex items-center space-x-2 px-7 py-2.5 rounded-full text-xs font-bold text-white bg-[#173c34] hover:-translate-y-0.5 border-2 border-[#173c34] shadow-[0_4px_0_#0d2923] transition-all"
               >
                 <span>Next</span>
                 <FiArrowRight className="w-4 h-4" />
@@ -313,13 +312,13 @@ function QuizPlayContent() {
 
         {/* Right Column: Question Navigator Sidebar */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm sticky top-28 space-y-6">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                Question Navigator
+          <div className="bg-white rounded-[2rem] p-6 border-2 border-[#173c34] shadow-[8px_8px_0_#173c34] sticky top-28 space-y-6">
+            <div className="flex items-center justify-between pb-3 border-b-2 border-[#173c34]/10">
+              <h2 className="font-display text-sm font-bold text-[#173c34] uppercase tracking-wider">
+                Question Matrix
               </h2>
-              <span className="text-xs font-semibold text-indigo-600">
-                {answeredCount}/{questions.length} Done
+              <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-[#b5e7d2] text-[#173c34] border border-[#173c34]">
+                {answeredCount}/{questions.length}
               </span>
             </div>
 
@@ -330,11 +329,13 @@ function QuizPlayContent() {
                 const isAnswered = !!answers[qId];
                 const isCurrent = currentIndex === idx;
 
-                let btnStyles = 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200';
+                let btnStyles = 'bg-[#fdfbf7] text-[#173c34] border-[#d9ded8] hover:border-[#173c34]';
                 if (isCurrent) {
-                  btnStyles = 'bg-indigo-600 text-white font-bold ring-2 ring-indigo-600 ring-offset-2';
+                  btnStyles = 'bg-[#f7b955] text-[#173c34] font-black border-2 border-[#173c34] shadow-[2px_2px_0_#173c34]';
                 } else if (isAnswered) {
-                  btnStyles = 'bg-indigo-100 text-indigo-800 border-indigo-200 font-semibold';
+                  btnStyles = 'bg-[#b5e7d2] text-[#173c34] font-bold border-2 border-[#173c34]';
+                } else {
+                  btnStyles = 'bg-white text-[#173c34] border border-[#173c34]/20';
                 }
 
                 return (
@@ -342,7 +343,7 @@ function QuizPlayContent() {
                     key={qId || idx}
                     type="button"
                     onClick={() => setCurrentIndex(idx)}
-                    className={`h-10 rounded-xl text-sm border flex items-center justify-center transition-all ${btnStyles}`}
+                    className={`h-10 rounded-xl text-xs flex items-center justify-center transition-all ${btnStyles}`}
                     title={`Question ${idx + 1}: ${isAnswered ? 'Answered' : 'Unanswered'}`}
                   >
                     {idx + 1}
@@ -352,17 +353,17 @@ function QuizPlayContent() {
             </div>
 
             {/* Legend */}
-            <div className="pt-3 border-t border-slate-100 space-y-2 text-xs text-slate-500">
+            <div className="pt-3 border-t border-[#173c34]/10 space-y-2 text-xs font-medium text-[#173c34]/70">
               <div className="flex items-center space-x-2">
-                <div className="w-3.5 h-3.5 rounded bg-indigo-600 ring-1 ring-indigo-600 ring-offset-1" />
+                <div className="w-3.5 h-3.5 rounded bg-[#f7b955] border border-[#173c34]" />
                 <span>Current Question</span>
               </div>
               <div className="flex items-center space-x-2">
-                <div className="w-3.5 h-3.5 rounded bg-indigo-100 border border-indigo-300" />
+                <div className="w-3.5 h-3.5 rounded bg-[#b5e7d2] border border-[#173c34]" />
                 <span>Answered</span>
               </div>
               <div className="flex items-center space-x-2">
-                <div className="w-3.5 h-3.5 rounded bg-slate-100 border border-slate-200" />
+                <div className="w-3.5 h-3.5 rounded bg-white border border-[#173c34]/30" />
                 <span>Unanswered</span>
               </div>
             </div>
@@ -372,7 +373,7 @@ function QuizPlayContent() {
               type="button"
               onClick={() => setShowConfirmModal(true)}
               disabled={isSubmitting}
-              className="w-full py-3 px-4 rounded-xl font-semibold text-sm text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-200 transition-all flex items-center justify-center space-x-2"
+              className="w-full py-3 px-4 rounded-full font-bold text-xs uppercase tracking-wider text-white bg-[#e65f45] hover:-translate-y-0.5 border-2 border-[#173c34] shadow-[0_4px_0_#a83a29] transition-all flex items-center justify-center space-x-2"
             >
               <FiSend className="w-4 h-4" />
               <span>Submit Quiz Now</span>
@@ -383,23 +384,23 @@ function QuizPlayContent() {
 
       {/* Submit Confirmation Modal */}
       {showConfirmModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 border border-slate-200 shadow-2xl transition-all animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 bg-[#173c34]/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#f7f4ec] rounded-[2.25rem] max-w-md w-full p-6 sm:p-8 border-3 border-[#173c34] shadow-[12px_12px_0_#173c34] transition-all animate-in fade-in zoom-in-95">
             <div className="text-center space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-sm">
-                <FiCheckCircle className="w-6 h-6" />
+              <div className="w-14 h-14 rounded-2xl bg-[#f7b955] border-2 border-[#173c34] text-[#173c34] flex items-center justify-center mx-auto shadow-[3px_3px_0_#173c34]">
+                <FiCheckCircle className="w-7 h-7" />
               </div>
-              <h3 className="text-xl font-extrabold text-slate-900">Submit Quiz?</h3>
-              <p className="text-sm text-slate-600">
-                You have answered <span className="font-bold text-slate-900">{answeredCount}</span> of{' '}
-                <span className="font-bold text-slate-900">{questions.length}</span> questions.
+              <h3 className="font-display text-2xl font-bold text-[#173c34]">Ready to Submit?</h3>
+              <p className="text-sm text-[#173c34]/80">
+                You have answered <span className="font-bold text-[#173c34]">{answeredCount}</span> of{' '}
+                <span className="font-bold text-[#173c34]">{questions.length}</span> questions.
               </p>
               {unansweredCount > 0 && (
-                <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-800 text-xs font-medium text-left flex items-start space-x-2">
-                  <FiAlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-600" />
+                <div className="p-3 bg-[#fff0ed] rounded-2xl border-2 border-[#e65f45] text-[#173c34] text-xs font-semibold text-left flex items-start space-x-2">
+                  <FiAlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-[#e65f45]" />
                   <span>
-                    You have <span className="font-bold">{unansweredCount}</span> unanswered question
-                    {unansweredCount > 1 ? 's' : ''}. Unanswered questions will receive zero points.
+                    You have <span className="font-bold text-[#e65f45]">{unansweredCount}</span> unanswered question
+                    {unansweredCount > 1 ? 's' : ''}. Unanswered questions receive 0 points.
                   </span>
                 </div>
               )}
@@ -410,7 +411,7 @@ function QuizPlayContent() {
                 type="button"
                 onClick={() => setShowConfirmModal(false)}
                 disabled={isSubmitting}
-                className="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 border border-slate-200 transition-colors"
+                className="px-5 py-2.5 rounded-full text-xs font-bold text-[#173c34] bg-white hover:bg-[#eef3f0] border-2 border-[#173c34] transition-all"
               >
                 Review Answers
               </button>
@@ -418,14 +419,14 @@ function QuizPlayContent() {
                 type="button"
                 onClick={submitQuiz}
                 disabled={isSubmitting}
-                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-200 transition-all flex items-center space-x-1.5"
+                className="px-6 py-2.5 rounded-full text-xs font-bold text-white bg-[#e65f45] hover:-translate-y-0.5 border-2 border-[#173c34] shadow-[0_4px_0_#a83a29] transition-all flex items-center space-x-1.5"
               >
                 {isSubmitting ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
-                    <FiSend className="w-4 h-4" />
-                    <span>Confirm & Submit</span>
+                    <FiSend className="w-3.5 h-3.5" />
+                    <span>Confirm & Finish</span>
                   </>
                 )}
               </button>

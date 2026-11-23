@@ -4,8 +4,8 @@ import Navbar from '../components/Navbar';
 import { Toaster } from 'react-hot-toast';
 
 export const metadata = {
-  title: 'QuizMaster — Interactive Quiz Platform',
-  description: 'Live interactive quizzes, question manager, timed assessments, and real-time leaderboards.',
+  title: 'CloudQuest — Quiz Arena',
+  description: 'Timed quizzes, live rankings, and focused learning.',
 };
 
 export default function RootLayout({ children }) {
@@ -15,35 +15,36 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&family=Manrope:wght@300;400;500;600;700;800&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col">
+      <body className="bg-[#f7f4ec] text-[#172a25] font-sans antialiased min-h-screen flex flex-col">
         <AuthProvider>
           <Navbar />
-          <div className="flex-1">{children}</div>
+          <div className="flex-1 flex flex-col">{children}</div>
           <Toaster
             position="top-right"
             toastOptions={{
               duration: 3500,
               style: {
                 background: '#ffffff',
-                color: '#0f172a',
+                color: '#173c34',
                 fontSize: '14px',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0',
-                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
+                fontWeight: '600',
+                borderRadius: '16px',
+                border: '2px solid #173c34',
+                boxShadow: '4px 4px 0 #173c34',
               },
               success: {
                 iconTheme: {
-                  primary: '#10b981',
-                  secondary: '#ffffff',
+                  primary: '#173c34',
+                  secondary: '#f7b955',
                 },
               },
               error: {
                 iconTheme: {
-                  primary: '#ef4444',
+                  primary: '#e65f45',
                   secondary: '#ffffff',
                 },
               },

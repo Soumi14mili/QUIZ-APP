@@ -152,38 +152,38 @@ function QuestionManagerContent() {
       <div className="space-y-4">
         <button
           onClick={() => router.push('/admin/dashboard')}
-          className="inline-flex items-center space-x-1.5 text-sm font-semibold text-slate-500 hover:text-indigo-600 transition-colors"
+          className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full text-xs font-bold text-[#173c34] bg-white hover:bg-[#eef3f0] border-2 border-[#173c34] shadow-[2px_2px_0_#173c34] transition-all"
         >
-          <FiArrowLeft className="w-4 h-4" />
-          <span>Back to Admin Dashboard</span>
+          <FiArrowLeft className="w-3.5 h-3.5" />
+          <span>Back to Console</span>
         </button>
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b-2 border-[#173c34]/15">
           <div>
             <div className="flex items-center space-x-3">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              <h1 className="font-display text-2xl sm:text-4xl font-normal text-[#173c34] tracking-tight">
                 {session?.title || 'Session Questions'}
               </h1>
               {session?.status && (
                 <span
-                  className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${
+                  className={`text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full border-2 border-[#173c34] ${
                     session.status === 'Live'
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      : 'bg-slate-100 text-slate-700 border-slate-200'
+                      ? 'bg-[#b5e7d2] text-[#173c34]'
+                      : 'bg-[#f7b955] text-[#173c34]'
                   }`}
                 >
                   {session.status}
                 </span>
               )}
             </div>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-xs sm:text-sm text-[#173c34]/70 mt-1.5">
               {questions.length} total questions configured for this quiz session
             </p>
           </div>
 
           <button
             onClick={openAddModal}
-            className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl font-semibold text-sm text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-200 transition-all flex-shrink-0"
+            className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider text-white bg-[#e65f45] hover:-translate-y-0.5 active:translate-y-0 border-2 border-[#173c34] shadow-[0_4px_0_#a83a29] transition-all flex-shrink-0"
           >
             <FiPlus className="w-4 h-4" />
             <span>Add Question</span>
@@ -193,28 +193,28 @@ function QuestionManagerContent() {
 
       {/* Questions list */}
       {loading ? (
-        <div className="py-16 bg-white rounded-3xl border border-slate-200 flex items-center justify-center">
-          <LoadingSpinner message="Loading questions..." />
+        <div className="py-16 bg-white rounded-[2rem] border-2 border-[#173c34] shadow-[6px_6px_0_#173c34] flex items-center justify-center">
+          <LoadingSpinner message="Loading question bank..." />
         </div>
       ) : questions.length === 0 ? (
-        <div className="text-center py-16 px-4 bg-white rounded-3xl border border-slate-200 space-y-4">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center mx-auto">
-            <FiHelpCircle className="w-6 h-6" />
+        <div className="text-center py-16 px-6 bg-white rounded-[2rem] border-2 border-[#173c34] shadow-[6px_6px_0_#173c34] space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-[#f7f4ec] border-2 border-[#173c34] text-[#173c34] flex items-center justify-center mx-auto shadow-[3px_3px_0_#173c34]">
+            <FiHelpCircle className="w-7 h-7" />
           </div>
-          <h3 className="text-lg font-bold text-slate-800">No questions yet</h3>
-          <p className="text-sm text-slate-500 max-w-sm mx-auto">
-            Add multiple choice questions with 4 options and mark the correct answer.
+          <h3 className="font-display text-xl font-bold text-[#173c34]">No questions added yet</h3>
+          <p className="text-xs sm:text-sm text-[#173c34]/70 max-w-sm mx-auto">
+            Build your multiple-choice questions with 4 options and designate the correct answer.
           </p>
           <button
             onClick={openAddModal}
-            className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-all"
+            className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-full text-xs font-bold text-white bg-[#e65f45] border-2 border-[#173c34] shadow-[0_4px_0_#a83a29] transition-all"
           >
             <FiPlus className="w-4 h-4" />
             <span>Add First Question</span>
           </button>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-5">
           {questions.map((q, idx) => {
             const qId = q.id || q._id;
             const options = [
@@ -227,14 +227,14 @@ function QuestionManagerContent() {
             return (
               <div
                 key={qId || idx}
-                className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:border-slate-300 transition-all space-y-4"
+                className="bg-white rounded-[2rem] p-6 sm:p-7 border-2 border-[#173c34] shadow-[6px_6px_0_#173c34] hover:shadow-[8px_8px_0_#173c34] transition-all space-y-4"
               >
                 <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start space-x-3">
-                    <span className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="flex items-start space-x-3.5">
+                    <span className="w-8 h-8 rounded-xl bg-[#f7b955] border-2 border-[#173c34] text-[#173c34] text-xs font-black font-display flex items-center justify-center flex-shrink-0 mt-0.5 shadow-[1px_1px_0_#173c34]">
                       {idx + 1}
                     </span>
-                    <h3 className="text-base font-semibold text-slate-900 leading-snug">
+                    <h3 className="font-display text-base sm:text-lg font-normal text-[#173c34] leading-relaxed">
                       {q.question_text}
                     </h3>
                   </div>
@@ -242,17 +242,17 @@ function QuestionManagerContent() {
                   <div className="flex items-center space-x-2 flex-shrink-0">
                     <button
                       onClick={() => openEditModal(q)}
-                      className="p-2 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                      className="w-9 h-9 rounded-full border-2 border-[#173c34] bg-white text-[#173c34] hover:bg-[#eef3f0] shadow-[2px_2px_0_#173c34] flex items-center justify-center transition-all"
                       title="Edit question"
                     >
-                      <FiEdit className="w-4 h-4" />
+                      <FiEdit className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDelete(qId)}
-                      className="p-2 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                      className="w-9 h-9 rounded-full border-2 border-[#e65f45] bg-[#fff0ed] text-[#e65f45] hover:bg-[#ffb6aa] shadow-[2px_2px_0_#e65f45] flex items-center justify-center transition-all"
                       title="Delete question"
                     >
-                      <FiTrash2 className="w-4 h-4" />
+                      <FiTrash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -264,22 +264,22 @@ function QuestionManagerContent() {
                     return (
                       <div
                         key={opt.key}
-                        className={`flex items-center p-3 rounded-xl border text-sm transition-colors ${
+                        className={`flex items-center p-3 rounded-xl border-2 text-xs sm:text-sm transition-all ${
                           isCorrect
-                            ? 'bg-emerald-50 border-emerald-300 text-emerald-950 font-medium ring-1 ring-emerald-400/30'
-                            : 'bg-slate-50 border-slate-200 text-slate-700'
+                            ? 'bg-[#e8f5ef] border-[#236653] text-[#173c34] font-semibold shadow-[2px_2px_0_#236653]'
+                            : 'bg-[#fdfbf7] border-[#173c34]/20 text-[#173c34]'
                         }`}
                       >
                         <span
-                          className={`w-6 h-6 rounded-md font-bold text-xs flex items-center justify-center mr-2.5 flex-shrink-0 ${
-                            isCorrect ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'
+                          className={`w-6 h-6 rounded-lg font-bold text-xs flex items-center justify-center mr-2.5 flex-shrink-0 border ${
+                            isCorrect ? 'bg-[#236653] text-white border-[#236653]' : 'bg-white text-[#173c34] border-[#173c34]/30'
                           }`}
                         >
                           {opt.key}
                         </span>
                         <span className="flex-1 truncate">{opt.text}</span>
                         {isCorrect && (
-                          <span className="ml-2 text-xs font-bold text-emerald-700 flex items-center space-x-1 flex-shrink-0">
+                          <span className="ml-2 text-xs font-black text-[#236653] flex items-center space-x-1 flex-shrink-0">
                             <FiCheck className="w-3.5 h-3.5" />
                             <span>Correct</span>
                           </span>
@@ -296,15 +296,20 @@ function QuestionManagerContent() {
 
       {/* Add / Edit Question Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 border border-slate-200 shadow-2xl transition-all animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <h3 className="text-xl font-bold text-slate-900">
-                {editingQuestion ? 'Edit Question' : 'Add New Question'}
-              </h3>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-[#173c34]/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#f7f4ec] rounded-[2.25rem] max-w-xl w-full p-6 sm:p-8 border-3 border-[#173c34] shadow-[12px_12px_0_#173c34] transition-all animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between pb-4 border-b-2 border-[#173c34]/15">
+              <div>
+                <span className="inline-block px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-[#b5e7d2] text-[#173c34] border border-[#173c34] mb-2">
+                  Question Builder
+                </span>
+                <h3 className="font-display text-2xl font-bold text-[#173c34]">
+                  {editingQuestion ? 'Edit Question' : 'Add New Question'}
+                </h3>
+              </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                className="w-10 h-10 rounded-full border-2 border-[#173c34] bg-white text-[#173c34] hover:bg-[#ffb6aa] flex items-center justify-center transition-all shadow-[2px_2px_0_#173c34]"
               >
                 <FiX className="w-5 h-5" />
               </button>
@@ -312,7 +317,7 @@ function QuestionManagerContent() {
 
             <form onSubmit={handleSubmitQuestion} className="mt-5 space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1" htmlFor="q-text">
+                <label className="block text-xs font-black uppercase tracking-wider text-[#173c34] mb-2" htmlFor="q-text">
                   Question Text *
                 </label>
                 <textarea
@@ -321,18 +326,18 @@ function QuestionManagerContent() {
                   required
                   value={questionText}
                   onChange={(e) => setQuestionText(e.target.value)}
-                  placeholder="Enter the question prompt here..."
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 text-sm text-slate-900 placeholder-slate-400 resize-none"
+                  placeholder="Enter the scenario or architecture question prompt here..."
+                  className="w-full px-4 py-3 rounded-xl border-2 border-[#173c34] bg-white text-[#173c34] font-medium placeholder-[#173c34]/40 focus:outline-none focus:shadow-[4px_4px_0_#173c34] transition-all resize-none text-sm"
                 />
               </div>
 
               {/* 4 Options */}
               <div className="space-y-3">
-                <label className="block text-sm font-semibold text-slate-700">
+                <label className="block text-xs font-black uppercase tracking-wider text-[#173c34]">
                   Answer Options & Correct Choice *
                 </label>
-                <p className="text-xs text-slate-500 -mt-2 mb-2">
-                  Fill in all 4 options, and select the radio button next to the correct answer.
+                <p className="text-xs text-[#173c34]/70 -mt-1.5 mb-2">
+                  Fill in all 4 options, and click the letter badge to designate the correct answer.
                 </p>
 
                 {[
@@ -343,10 +348,10 @@ function QuestionManagerContent() {
                 ].map(({ key, value, setter }) => (
                   <div key={key} className="flex items-center space-x-3">
                     <label
-                      className={`flex items-center justify-center w-8 h-8 rounded-xl font-bold text-xs cursor-pointer border-2 transition-all ${
+                      className={`flex items-center justify-center w-9 h-9 rounded-xl font-display font-bold text-xs cursor-pointer border-2 transition-all ${
                         correctOption === key
-                          ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm'
-                          : 'bg-slate-100 border-slate-200 text-slate-600 hover:border-slate-300'
+                          ? 'bg-[#236653] border-[#236653] text-white shadow-[2px_2px_0_#173c34]'
+                          : 'bg-white border-[#173c34] text-[#173c34] hover:bg-[#f7b955]'
                       }`}
                       title={`Mark ${key} as correct answer`}
                     >
@@ -367,29 +372,29 @@ function QuestionManagerContent() {
                       value={value}
                       onChange={(e) => setter(e.target.value)}
                       placeholder={`Option ${key} text`}
-                      className={`flex-1 px-4 py-2 rounded-xl border text-sm transition-colors ${
+                      className={`flex-1 px-4 py-2.5 rounded-xl border-2 text-xs sm:text-sm font-medium transition-all ${
                         correctOption === key
-                          ? 'border-emerald-500 bg-emerald-50/20 text-emerald-950 font-medium'
-                          : 'border-slate-300 text-slate-900'
+                          ? 'border-[#236653] bg-[#e8f5ef] text-[#173c34] font-semibold'
+                          : 'border-[#173c34] bg-white text-[#173c34]'
                       }`}
                     />
                   </div>
                 ))}
               </div>
 
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
+              <div className="pt-4 border-t-2 border-[#173c34]/15 flex items-center justify-end space-x-3">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
                   disabled={formLoading}
-                  className="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 border border-slate-200 transition-colors"
+                  className="px-5 py-2.5 rounded-full border-2 border-[#173c34] bg-white text-[#173c34] font-bold text-xs hover:bg-[#eef3f0] transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={formLoading}
-                  className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-60 shadow-md shadow-indigo-200 transition-all flex items-center space-x-1.5"
+                  className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-full bg-[#e65f45] text-white font-bold text-xs border-2 border-[#173c34] shadow-[0_4px_0_#a83a29] hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-60"
                 >
                   {formLoading ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

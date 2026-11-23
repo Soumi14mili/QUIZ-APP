@@ -6,13 +6,7 @@ import api from '../../../api/axios';
 import { useAuth } from '../../../context/AuthContext';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import LoadingSpinner from '../../../components/LoadingSpinner';
-import {
-  FiAward,
-  FiClock,
-  FiArrowLeft,
-  FiRefreshCw,
-  FiUser,
-} from 'react-icons/fi';
+import { FiAward, FiArrowLeft, FiRefreshCw, FiClock } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 // Helper to format time_taken_ms as mm:ss
@@ -77,159 +71,154 @@ function LeaderboardContent() {
     fetchLeaderboard();
   }, [sessionId, isAdmin]);
 
-  const getRankBadge = (rank) => {
-    if (rank === 1) {
-      return (
-        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-tr from-amber-400 to-yellow-300 text-amber-950 font-extrabold text-sm shadow-md shadow-amber-200 ring-2 ring-amber-400/50">
-          🥇 1
-        </span>
-      );
-    }
-    if (rank === 2) {
-      return (
-        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-tr from-slate-200 to-slate-400 text-slate-900 font-extrabold text-sm shadow-md ring-2 ring-slate-300">
-          🥈 2
-        </span>
-      );
-    }
-    if (rank === 3) {
-      return (
-        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-tr from-amber-700 to-amber-600 text-white font-extrabold text-sm shadow-md ring-2 ring-amber-700/50">
-          🥉 3
-        </span>
-      );
-    }
-    return (
-      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-700 font-bold text-sm">
-        #{rank}
-      </span>
-    );
-  };
-
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
-      {/* Top Header & Actions */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
+    <main className="min-h-[calc(100vh-80px)] bg-[#173c34] px-5 py-8 text-white sm:px-8">
+      <section className="mx-auto max-w-5xl py-8">
+        {/* Navigation & Refresh */}
+        <div className="flex items-center justify-between mb-8">
           <button
             onClick={() => router.push(isAdmin ? '/admin/dashboard' : '/dashboard')}
-            className="inline-flex items-center space-x-1.5 text-xs font-semibold text-slate-500 hover:text-indigo-600 mb-2 transition-colors"
+            className="flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-xs font-extrabold text-[#b8cec8] hover:bg-white/10 transition"
           >
-            <FiArrowLeft className="w-3.5 h-3.5" />
+            <FiArrowLeft className="h-4 w-4" />
             <span>Back to {isAdmin ? 'Admin Dashboard' : 'Dashboard'}</span>
           </button>
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-200">
-              <FiAward className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                {sessionTitle || 'Session Leaderboard'}
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-500">
-                Official ranking of participants sorted by highest score and fastest completion time
-              </p>
-            </div>
-          </div>
-        </div>
 
-        <button
-          onClick={() => fetchLeaderboard(true)}
-          disabled={refreshing || loading}
-          className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 shadow-sm transition-all"
-        >
-          <FiRefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-indigo-600' : ''}`} />
-          <span>Refresh Scores</span>
-        </button>
-      </div>
-
-      {/* Main Content Area */}
-      {loading ? (
-        <div className="py-20 bg-white rounded-3xl border border-slate-200 flex items-center justify-center">
-          <LoadingSpinner message="Calculating rankings and scores..." />
-        </div>
-      ) : leaderboard.length === 0 ? (
-        <div className="text-center py-20 px-4 bg-white rounded-3xl border border-slate-200 space-y-4">
-          <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mx-auto">
-            <FiAward className="w-8 h-8" />
-          </div>
-          <h3 className="text-xl font-bold text-slate-800">No submissions yet</h3>
-          <p className="text-sm text-slate-500 max-w-sm mx-auto">
-            Be the first student to complete this quiz and claim the #1 spot on the leaderboard!
-          </p>
           <button
-            onClick={() => router.push('/dashboard')}
-            className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-all"
+            onClick={() => fetchLeaderboard(true)}
+            disabled={refreshing || loading}
+            className="flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-xs font-extrabold text-[#b8cec8] hover:bg-white/10 transition disabled:opacity-50"
           >
-            <span>Go to Dashboard</span>
+            <FiRefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <span>Refresh ranks</span>
           </button>
         </div>
-      ) : (
-        <div className="space-y-6">
-          {/* Top 3 Podium Cards */}
-          {leaderboard.length >= 2 && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-              {/* Rank 2 */}
-              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col items-center text-center order-2 sm:order-1 sm:mt-6">
-                <span className="text-2xl mb-1">🥈</span>
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">2nd Place</span>
-                <h4 className="font-bold text-slate-900 mt-1 truncate max-w-full">
-                  {leaderboard[1]?.student_name || 'Participant'}
-                </h4>
-                <div className="text-xl font-extrabold text-slate-800 mt-2">
-                  {leaderboard[1]?.score} <span className="text-xs font-normal text-slate-500">pts</span>
-                </div>
-                <div className="text-xs text-slate-500 font-mono mt-0.5">
-                  ⏱ {formatTimeTaken(leaderboard[1]?.time_taken_ms)}
-                </div>
-              </div>
 
-              {/* Rank 1 (Gold) */}
-              <div className="bg-gradient-to-b from-amber-50 to-white rounded-2xl p-6 border-2 border-amber-300 shadow-lg shadow-amber-100 flex flex-col items-center text-center order-1 sm:order-2">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-amber-400 to-yellow-300 flex items-center justify-center text-2xl shadow-md mb-2">
-                  👑
-                </div>
-                <span className="text-xs font-extrabold uppercase tracking-widest text-amber-700">Champion</span>
-                <h4 className="font-extrabold text-lg text-slate-900 mt-1 truncate max-w-full">
-                  {leaderboard[0]?.student_name || 'Participant'}
-                </h4>
-                <div className="text-3xl font-extrabold text-amber-600 mt-2">
-                  {leaderboard[0]?.score} <span className="text-sm font-normal text-slate-600">pts</span>
-                </div>
-                <div className="text-xs font-bold text-slate-600 font-mono mt-1">
-                  ⏱ {formatTimeTaken(leaderboard[0]?.time_taken_ms)}
-                </div>
-              </div>
+        {/* Hero Header */}
+        <div className="text-center">
+          <span className="inline-grid h-14 w-14 place-items-center rounded-2xl bg-[#f7b955] text-[#173c34] shadow-[4px_4px_0_#0b2721]">
+            <FiAward className="h-7 w-7" />
+          </span>
+          <p className="mt-6 text-xs font-extrabold uppercase tracking-[.18em] text-[#b5e7d2]">
+            {sessionTitle ? `${sessionTitle} rankings` : 'Live class rankings'}
+          </p>
+          <h1 className="font-display mt-3 text-5xl tracking-[-.05em] sm:text-7xl text-white">
+            Leaderboard
+          </h1>
+          <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-[#b8cec8]">
+            Accuracy takes the podium. Faster completion time breaks a tie.
+          </p>
+        </div>
 
-              {/* Rank 3 */}
-              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col items-center text-center order-3 sm:mt-8">
-                <span className="text-2xl mb-1">🥉</span>
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-700/80">3rd Place</span>
-                <h4 className="font-bold text-slate-900 mt-1 truncate max-w-full">
-                  {leaderboard[2]?.student_name || 'Participant'}
-                </h4>
-                <div className="text-xl font-extrabold text-slate-800 mt-2">
-                  {leaderboard[2]?.score} <span className="text-xs font-normal text-slate-500">pts</span>
-                </div>
-                <div className="text-xs text-slate-500 font-mono mt-0.5">
-                  ⏱ {formatTimeTaken(leaderboard[2]?.time_taken_ms)}
-                </div>
-              </div>
+        {loading ? (
+          <div className="mt-12 py-20 flex justify-center">
+            <LoadingSpinner message="Calculating rankings and scores..." />
+          </div>
+        ) : leaderboard.length === 0 ? (
+          /* Empty state matching Figma exact layout */
+          <div className="mt-12 overflow-hidden rounded-[2rem] bg-white text-[#173c34] shadow-[10px_10px_0_#f7b955] border-2 border-[#173c34]">
+            <div className="grid grid-cols-[48px_1fr_80px_90px] gap-3 border-b border-[#e4e7e3] bg-[#f6f7f4] px-5 py-4 text-[10px] font-black uppercase tracking-wider text-[#7b8984] sm:grid-cols-[70px_1fr_120px_130px]">
+              <span>Rank</span>
+              <span>Student</span>
+              <span>Score</span>
+              <span>Time</span>
             </div>
-          )}
+            <div className="p-14 text-center">
+              <h2 className="font-extrabold text-xl text-[#173c34]">The board is ready.</h2>
+              <p className="mt-2 text-sm text-[#76847f]">
+                Completed quiz sessions will appear here. Be the first to claim #1!
+              </p>
+              <button
+                onClick={() => router.push('/dashboard')}
+                className="mt-6 rounded-full bg-[#173c34] px-6 py-2.5 text-xs font-extrabold text-white shadow-[0_4px_0_#0d2923] hover:-translate-y-0.5 transition"
+              >
+                Go to Dashboard
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-12 space-y-8">
+            {/* Top 3 Podium */}
+            {leaderboard.length >= 2 && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                {/* Rank 2 */}
+                <div className="rounded-[1.75rem] border-2 border-[#173c34] bg-[#b5e7d2] p-6 text-[#173c34] shadow-[6px_6px_0_#0b2721] order-2 sm:order-1 sm:h-52 flex flex-col justify-between">
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl">🥈</span>
+                    <span className="rounded-full bg-white/40 px-3 py-1 text-[10px] font-black uppercase tracking-wider">
+                      2nd Place
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="font-display text-xl truncate font-bold">
+                      {leaderboard[1]?.student_name}
+                    </h3>
+                    <div className="mt-2 flex items-baseline gap-2">
+                      <span className="text-3xl font-black">{leaderboard[1]?.score}</span>
+                      <span className="text-xs font-bold text-[#173c34]/70">pts</span>
+                      <span className="ml-auto font-mono text-xs font-bold">
+                        ⏱ {formatTimeTaken(leaderboard[1]?.time_taken_ms)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-          {/* Table for Desktop */}
-          <div className="hidden md:block bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-xs font-bold uppercase tracking-wider text-slate-500">
-                  <th className="py-4 px-6 w-24 text-center">Rank</th>
-                  <th className="py-4 px-6">Student</th>
-                  <th className="py-4 px-6 text-center">Score</th>
-                  <th className="py-4 px-6 text-right">Time Taken</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-sm">
+                {/* Rank 1 (Gold Champion) */}
+                <div className="rounded-[2rem] border-2 border-[#173c34] bg-[#f7b955] p-7 text-[#173c34] shadow-[8px_8px_0_#0b2721] order-1 sm:order-2 sm:h-60 flex flex-col justify-between">
+                  <div className="flex items-center justify-between">
+                    <span className="text-3xl">👑</span>
+                    <span className="rounded-full bg-[#173c34] text-[#f7b955] px-3.5 py-1 text-[10px] font-black uppercase tracking-widest shadow-sm">
+                      Champion
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="font-display text-2xl truncate font-extrabold">
+                      {leaderboard[0]?.student_name}
+                    </h3>
+                    <div className="mt-2 flex items-baseline gap-2">
+                      <span className="text-4xl font-black">{leaderboard[0]?.score}</span>
+                      <span className="text-sm font-bold text-[#173c34]/70">pts</span>
+                      <span className="ml-auto font-mono text-xs font-black">
+                        ⏱ {formatTimeTaken(leaderboard[0]?.time_taken_ms)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Rank 3 */}
+                <div className="rounded-[1.75rem] border-2 border-[#173c34] bg-[#ffb6aa] p-6 text-[#173c34] shadow-[6px_6px_0_#0b2721] order-3 sm:h-48 flex flex-col justify-between">
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl">🥉</span>
+                    <span className="rounded-full bg-white/40 px-3 py-1 text-[10px] font-black uppercase tracking-wider">
+                      3rd Place
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="font-display text-xl truncate font-bold">
+                      {leaderboard[2]?.student_name || 'Participant'}
+                    </h3>
+                    <div className="mt-2 flex items-baseline gap-2">
+                      <span className="text-3xl font-black">{leaderboard[2]?.score || 0}</span>
+                      <span className="text-xs font-bold text-[#173c34]/70">pts</span>
+                      <span className="ml-auto font-mono text-xs font-bold">
+                        ⏱ {formatTimeTaken(leaderboard[2]?.time_taken_ms)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Official Rankings Table */}
+            <div className="overflow-hidden rounded-[2rem] bg-white text-[#173c34] shadow-[10px_10px_0_#f7b955] border-2 border-[#173c34]">
+              <div className="grid grid-cols-[60px_1fr_90px_100px] gap-3 border-b border-[#e4e7e3] bg-[#f6f7f4] px-6 py-4 text-[10px] font-black uppercase tracking-wider text-[#7b8984] sm:grid-cols-[80px_1fr_120px_130px]">
+                <span>Rank</span>
+                <span>Student</span>
+                <span>Score</span>
+                <span>Time</span>
+              </div>
+
+              <div className="divide-y divide-[#eceeea]">
                 {leaderboard.map((row, index) => {
                   const rank = row.rank || index + 1;
                   const isCurrentUser =
@@ -238,97 +227,66 @@ function LeaderboardContent() {
                       row.user_id === user.id ||
                       row.student_id === user.id);
 
-                  let rowStyles = isCurrentUser
-                    ? 'bg-indigo-50/80 font-semibold ring-2 ring-indigo-500 ring-inset'
-                    : 'hover:bg-slate-50/80';
-
                   return (
-                    <tr key={index} className={`transition-colors ${rowStyles}`}>
-                      <td className="py-4 px-6 text-center">
-                        <div className="flex justify-center">{getRankBadge(rank)}</div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-xs text-slate-700">
-                            {row.student_name ? row.student_name.charAt(0).toUpperCase() : <FiUser />}
-                          </div>
-                          <div>
-                            <span className="font-semibold text-slate-900">{row.student_name}</span>
-                            {isCurrentUser && (
-                              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-600 text-white">
-                                You
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6 text-center font-bold text-slate-900">
-                        <span className="text-base text-indigo-600 font-extrabold">{row.score}</span>
-                        {row.total_questions && (
-                          <span className="text-xs text-slate-400 font-normal"> / {row.total_questions}</span>
-                        )}
-                      </td>
-                      <td className="py-4 px-6 text-right font-mono text-slate-600 font-medium">
-                        {formatTimeTaken(row.time_taken_ms)}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                    <div
+                      key={index}
+                      className={`grid grid-cols-[60px_1fr_90px_100px] sm:grid-cols-[80px_1fr_120px_130px] items-center gap-3 px-6 py-4 transition ${
+                        isCurrentUser
+                          ? 'bg-[#fff0ed] font-extrabold text-[#173c34]'
+                          : 'hover:bg-[#fbfbfa]'
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <span
+                          className={`grid h-8 w-8 place-items-center rounded-xl text-xs font-black ${
+                            rank === 1
+                              ? 'bg-[#f7b955] text-[#173c34] shadow-[2px_2px_0_#173c34]'
+                              : rank === 2
+                              ? 'bg-[#b5e7d2] text-[#173c34]'
+                              : rank === 3
+                              ? 'bg-[#ffb6aa] text-[#173c34]'
+                              : 'bg-[#eceeea] text-[#596b65]'
+                          }`}
+                        >
+                          #{rank}
+                        </span>
+                      </div>
 
-          {/* Mobile Cards (Responsive) */}
-          <div className="md:hidden space-y-3">
-            {leaderboard.map((row, index) => {
-              const rank = row.rank || index + 1;
-              const isCurrentUser =
-                user &&
-                (row.student_name === user.full_name ||
-                  row.user_id === user.id ||
-                  row.student_id === user.id);
-
-              return (
-                <div
-                  key={index}
-                  className={`bg-white rounded-2xl p-4 border shadow-sm flex items-center justify-between transition-all ${
-                    isCurrentUser
-                      ? 'border-indigo-500 bg-indigo-50/60 ring-2 ring-indigo-400'
-                      : 'border-slate-200'
-                  }`}
-                >
-                  <div className="flex items-center space-x-3">
-                    {getRankBadge(rank)}
-                    <div>
-                      <div className="flex items-center space-x-1.5">
-                        <h4 className="font-bold text-sm text-slate-900">{row.student_name}</h4>
+                      <div className="flex items-center gap-2 truncate">
+                        <span className="font-extrabold text-sm truncate">{row.student_name}</span>
                         {isCurrentUser && (
-                          <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-indigo-600 text-white">
+                          <span className="rounded-full bg-[#e65f45] px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-white">
                             You
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center space-x-2 text-xs text-slate-500 mt-0.5">
-                        <FiClock className="w-3 h-3" />
-                        <span className="font-mono">{formatTimeTaken(row.time_taken_ms)}</span>
+
+                      <div className="font-extrabold text-sm">
+                        <span className="text-[#e65f45]">{row.score}</span>
+                        {row.total_questions && (
+                          <span className="text-xs font-medium text-[#8a9692]">
+                            {' '}
+                            / {row.total_questions}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="font-mono text-xs font-bold text-[#596b65]">
+                        {formatTimeTaken(row.time_taken_ms)}
                       </div>
                     </div>
-                  </div>
-
-                  <div className="text-right">
-                    <span className="text-lg font-extrabold text-indigo-600">{row.score}</span>
-                    {row.total_questions && (
-                      <span className="text-xs text-slate-400 font-normal">/{row.total_questions}</span>
-                    )}
-                    <div className="text-[10px] uppercase font-semibold text-slate-400">Score</div>
-                  </div>
-                </div>
-              );
-            })}
+                  );
+                })}
+              </div>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+
+        <p className="mt-8 text-center text-xs text-[#8eaaa2]">
+          Leaderboard updates whenever a student completes a quiz.
+        </p>
+      </section>
+    </main>
   );
 }
 

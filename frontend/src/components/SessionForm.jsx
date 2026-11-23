@@ -73,21 +73,24 @@ const SessionForm = ({ isOpen, onClose, onSuccess, initialData = null }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-slate-200 shadow-2xl transition-all animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#173c34]/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-[#f7f4ec] rounded-[2.25rem] max-w-lg w-full p-6 sm:p-8 border-3 border-[#173c34] shadow-[12px_12px_0_#173c34] transition-all animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div className="flex items-center justify-between pb-5 border-b-2 border-[#173c34]/15">
           <div>
-            <h3 className="text-xl font-bold text-slate-900">
+            <span className="inline-block px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-[#b5e7d2] text-[#173c34] border border-[#173c34] mb-2">
+              Instructor Session
+            </span>
+            <h3 className="font-display text-2xl font-bold text-[#173c34]">
               {isEdit ? 'Edit Quiz Session' : 'Create New Session'}
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-[#173c34]/70 mt-1">
               {isEdit ? 'Update session parameters and visibility' : 'Configure details for the upcoming quiz'}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            className="w-10 h-10 rounded-full border-2 border-[#173c34] bg-white text-[#173c34] hover:bg-[#ffb6aa] flex items-center justify-center transition-all shadow-[2px_2px_0_#173c34]"
           >
             <FiX className="w-5 h-5" />
           </button>
@@ -96,24 +99,22 @@ const SessionForm = ({ isOpen, onClose, onSuccess, initialData = null }) => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1" htmlFor="title">
+            <label className="block text-xs font-black uppercase tracking-wider text-[#173c34] mb-2" htmlFor="title">
               Session Title *
             </label>
-            <div className="relative">
-              <input
-                id="title"
-                type="text"
-                required
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. JavaScript Fundamentals & ES6"
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 text-sm text-slate-900 placeholder-slate-400"
-              />
-            </div>
+            <input
+              id="title"
+              type="text"
+              required
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. AWS Solutions Architect Associate Quiz"
+              className="w-full px-4 py-3 rounded-xl border-2 border-[#173c34] bg-white text-[#173c34] font-medium placeholder-[#173c34]/40 focus:outline-none focus:shadow-[4px_4px_0_#173c34] transition-all"
+            />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1" htmlFor="description">
+            <label className="block text-xs font-black uppercase tracking-wider text-[#173c34] mb-2" htmlFor="description">
               Description
             </label>
             <textarea
@@ -121,74 +122,70 @@ const SessionForm = ({ isOpen, onClose, onSuccess, initialData = null }) => {
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Provide context, instructions, or rules for students..."
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 text-sm text-slate-900 placeholder-slate-400 resize-none"
+              placeholder="Brief overview of topics covered, difficulty level, rules..."
+              className="w-full px-4 py-3 rounded-xl border-2 border-[#173c34] bg-white text-[#173c34] font-medium placeholder-[#173c34]/40 focus:outline-none focus:shadow-[4px_4px_0_#173c34] transition-all resize-none"
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1" htmlFor="duration">
-                Duration (Minutes) *
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                  <FiClock className="w-4 h-4" />
-                </div>
-                <input
-                  id="duration"
-                  type="number"
-                  min="1"
-                  max="300"
-                  required
-                  value={durationMinutes}
-                  onChange={(e) => setDurationMinutes(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-300 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 text-sm text-slate-900"
-                />
-              </div>
+          <div>
+            <label className="block text-xs font-black uppercase tracking-wider text-[#173c34] mb-2" htmlFor="duration">
+              Duration (Minutes) *
+            </label>
+            <div className="relative">
+              <input
+                id="duration"
+                type="number"
+                min="1"
+                max="300"
+                required
+                value={durationMinutes}
+                onChange={(e) => setDurationMinutes(e.target.value)}
+                className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-[#173c34] bg-white text-[#173c34] font-bold focus:outline-none focus:shadow-[4px_4px_0_#173c34] transition-all"
+              />
+              <FiClock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173c34]/60" />
             </div>
-
-            {isEdit && (
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1" htmlFor="status">
-                  Status
-                </label>
-                <div className="relative">
-                  <select
-                    id="status"
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 text-sm text-slate-900 bg-white"
-                  >
-                    <option value="Draft">Draft</option>
-                    <option value="Live">Live</option>
-                    <option value="Ended">Ended</option>
-                  </select>
-                </div>
-              </div>
-            )}
+            <p className="text-[11px] text-[#173c34]/60 mt-1">Timer starts counting down once a student begins.</p>
           </div>
 
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
+          {isEdit && (
+            <div>
+              <label className="block text-xs font-black uppercase tracking-wider text-[#173c34] mb-2" htmlFor="status">
+                Session Status
+              </label>
+              <select
+                id="status"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border-2 border-[#173c34] bg-white text-[#173c34] font-bold focus:outline-none focus:shadow-[4px_4px_0_#173c34] transition-all"
+              >
+                <option value="Draft">Draft (Only Admin can see & edit)</option>
+                <option value="Live">Live (Open for student joins)</option>
+                <option value="Ended">Ended (Submissions closed, results visible)</option>
+              </select>
+            </div>
+          )}
+
+          {/* Action buttons */}
+          <div className="flex items-center justify-end space-x-3 pt-4 border-t-2 border-[#173c34]/15">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 border border-slate-200 transition-colors"
+              className="px-5 py-2.5 rounded-full border-2 border-[#173c34] bg-white text-[#173c34] font-bold text-sm hover:bg-[#eef3f0] transition-all"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-60 shadow-md shadow-indigo-200 transition-all flex items-center space-x-1.5"
+              className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-full bg-[#e65f45] text-white font-bold text-sm border-2 border-[#173c34] shadow-[0_4px_0_#a83a29] hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-50"
             >
               {loading ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Saving...</span>
               ) : (
                 <>
                   <FiCheck className="w-4 h-4" />
-                  <span>{isEdit ? 'Save Changes' : 'Create Session'}</span>
+                  <span>{isEdit ? 'Update Session' : 'Create Session'}</span>
                 </>
               )}
             </button>

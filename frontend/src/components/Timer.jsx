@@ -17,7 +17,6 @@ const Timer = ({ durationMs, startedAt, onTimeUp }) => {
   const [remainingMs, setRemainingMs] = useState(calculateRemaining);
 
   useEffect(() => {
-    // Initial check
     const initialRemaining = calculateRemaining();
     setRemainingMs(initialRemaining);
 
@@ -51,37 +50,42 @@ const Timer = ({ durationMs, startedAt, onTimeUp }) => {
   const seconds = totalSeconds % 60;
   const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
-  // Color styles based on thresholds
-  let statusClasses = 'bg-indigo-50 border-indigo-200 text-indigo-700';
-  let badgeText = 'Time Remaining';
+  // Theme styling based on remaining duration
+  let containerStyle = 'bg-[#f7b955] text-[#173c34] border-2 border-[#173c34] shadow-[3px_3px_0_#173c34]';
+  let badgeText = 'Time Left';
 
   if (remainingMs < 30000) {
-    statusClasses = 'bg-red-100 border-red-500 text-red-700 animate-pulse';
+    containerStyle = 'bg-[#ffb6aa] text-[#173c34] border-2 border-[#e65f45] shadow-[3px_3px_0_#e65f45] animate-pulse';
     badgeText = 'Hurry Up!';
   } else if (remainingMs < 60000) {
-    statusClasses = 'bg-rose-50 border-rose-300 text-rose-600';
-    badgeText = 'Under 1 Minute';
+    containerStyle = 'bg-[#ffb6aa] text-[#173c34] border-2 border-[#173c34] shadow-[3px_3px_0_#173c34]';
+    badgeText = '< 1 Min Left';
   } else if (remainingMs < 300000) {
-    statusClasses = 'bg-amber-50 border-amber-300 text-amber-700';
-    badgeText = 'Under 5 Minutes';
+    containerStyle = 'bg-[#f7b955] text-[#173c34] border-2 border-[#173c34] shadow-[3px_3px_0_#173c34]';
+    badgeText = '< 5 Mins Left';
   }
 
   return (
     <div
-      className={`inline-flex items-center space-x-2.5 px-4 py-2 rounded-xl border font-mono font-bold shadow-sm transition-all duration-300 ${statusClasses}`}
+      className={`inline-flex items-center space-x-3 px-4 py-2 rounded-2xl font-bold transition-all duration-300 ${containerStyle}`}
       role="timer"
       aria-label={`Time remaining: ${formattedTime}`}
     >
-      {remainingMs < 60000 ? (
-        <FiAlertTriangle className="w-5 h-5 text-current animate-bounce" />
-      ) : (
-        <FiClock className="w-5 h-5 text-current" />
-      )}
-      <div className="flex flex-col text-left font-sans">
-        <span className="text-[10px] uppercase tracking-wider font-semibold opacity-75">
+      <div className="w-8 h-8 rounded-full bg-white/70 border border-[#173c34]/20 flex items-center justify-center flex-shrink-0">
+        {remainingMs < 60000 ? (
+          <FiAlertTriangle className="w-4 h-4 text-[#e65f45] animate-bounce" />
+        ) : (
+          <FiClock className="w-4 h-4 text-[#173c34]" />
+        )}
+      </div>
+
+      <div className="flex flex-col text-left">
+        <span className="text-[10px] uppercase tracking-wider font-extrabold opacity-75">
           {badgeText}
         </span>
-        <span className="text-xl font-mono font-bold leading-none">{formattedTime}</span>
+        <span className="text-xl font-display font-bold leading-none tracking-tight">
+          {formattedTime}
+        </span>
       </div>
     </div>
   );

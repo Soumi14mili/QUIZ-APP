@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
-import { FiMail, FiLock, FiEye, FiEyeOff, FiShield, FiArrowRight } from 'react-icons/fi';
+import { FiLock, FiEye, FiEyeOff, FiShield, FiArrowRight } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 export default function AdminLoginPage() {
@@ -38,92 +38,100 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-900">
-      <div className="max-w-md w-full space-y-8 bg-slate-800/90 backdrop-blur p-8 sm:p-10 rounded-3xl border border-slate-700 shadow-2xl shadow-black/50">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="mx-auto w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center shadow-lg">
-            <FiShield className="w-6 h-6" />
-          </div>
-          <h2 className="text-3xl font-extrabold text-white tracking-tight">Admin Portal</h2>
-          <p className="text-sm text-slate-400">Secure access for quiz moderators & administrators</p>
-        </div>
-
-        {/* Form */}
-        <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-          <div>
-            <label className="block text-sm font-semibold text-slate-200 mb-1.5" htmlFor="admin-email">
-              Admin Email
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <FiMail className="w-5 h-5" />
-              </div>
-              <input
-                id="admin-email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@quizmaster.com"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-700 bg-slate-900/60 focus:bg-slate-900 text-white placeholder-slate-500 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-slate-200 mb-1.5" htmlFor="admin-password">
-              Admin Password
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <FiLock className="w-5 h-5" />
-              </div>
-              <input
-                id="admin-password"
-                type={showPassword ? 'text' : 'password'}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full pl-10 pr-11 py-3 rounded-xl border border-slate-700 bg-slate-900/60 focus:bg-slate-900 text-white placeholder-slate-500 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200"
-              >
-                {showPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full mt-2 py-3.5 px-4 rounded-xl text-white font-semibold text-sm bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center space-x-2"
-          >
-            {submitting ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <>
-                <span>Access Dashboard</span>
-                <FiArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
-        </form>
-
-        {/* Footer links */}
-        <div className="pt-4 border-t border-slate-700/60 text-center">
-          <Link
-            href="/login"
-            className="text-xs font-semibold text-slate-400 hover:text-indigo-400 transition-colors inline-flex items-center space-x-1"
-          >
-            <span>← Back to Student Login</span>
+    <main className="min-h-[calc(100vh-80px)] bg-[#eef3f0] px-5 py-8 text-[#173c34]">
+      <div className="mx-auto max-w-6xl">
+        <div className="flex justify-between items-center">
+          <Link href="/" className="flex items-center gap-2.5 font-extrabold tracking-[-0.04em]">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#173c34] text-[#f7b955] shadow-[2px_2px_0_#0d2923]">
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h3v3h-3v-3Zm5 0h2v7h-7v-2h5v-5Zm-5 5h3v2h-3v-2Z" />
+              </svg>
+            </span>
+            <span className="text-xl">
+              Cloud<span className="text-[#e65f45]">Quest</span>
+            </span>
+          </Link>
+          <Link href="/login" className="text-sm font-bold text-[#5f716b] hover:text-[#173c34] transition">
+            Student login →
           </Link>
         </div>
+
+        <div className="mx-auto grid min-h-[calc(100vh-160px)] max-w-6xl items-center gap-12 py-10 lg:grid-cols-2">
+          {/* Left Hero */}
+          <section>
+            <span className="text-xs font-extrabold uppercase tracking-[.16em] text-[#e65f45]">
+              Instructor workspace
+            </span>
+            <h1 className="font-display mt-5 text-6xl leading-[.95] tracking-[-0.045em] sm:text-7xl text-[#173c34]">
+              Run every quiz<br />
+              <em className="text-[#e65f45] not-italic">with confidence.</em>
+            </h1>
+            <p className="mt-7 max-w-lg text-lg leading-relaxed text-[#5f716b]">
+              Create question banks, schedule assessments, manage students, and review performance from one protected workspace.
+            </p>
+          </section>
+
+          {/* Right Card */}
+          <section className="rounded-[2rem] bg-[#173c34] p-7 text-white shadow-[10px_10px_0_#f7b955] sm:p-10 border-2 border-[#173c34]">
+            <div className="grid h-14 w-14 place-items-center rounded-2xl bg-[#f7b955] text-[#173c34] shadow-[3px_3px_0_#0d2923]">
+              <FiShield className="h-7 w-7" />
+            </div>
+
+            <h2 className="font-display mt-7 text-4xl text-white">Admin access</h2>
+            <p className="mt-3 text-sm leading-relaxed text-[#bad0ca]">
+              Administrator accounts are separate from student accounts and use the secured instructor workspace.
+            </p>
+
+            <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+              <label className="block text-xs font-extrabold text-[#b5e7d2]">
+                Admin email
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@cloudquest.com"
+                  className="mt-2 w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3.5 text-sm font-medium text-white outline-none transition placeholder:text-white/40 focus:border-[#f7b955] focus:bg-white/15"
+                />
+              </label>
+
+              <label className="block text-xs font-extrabold text-[#b5e7d2]">
+                Admin password
+                <div className="relative mt-2">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3.5 text-sm font-medium text-white outline-none transition placeholder:text-white/40 focus:border-[#f7b955] focus:bg-white/15 pr-11"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-white/60 hover:text-white"
+                  >
+                    {showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </label>
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="mt-6 flex w-full items-center justify-between rounded-xl bg-white px-5 py-4 text-sm font-extrabold text-[#173c34] transition hover:-translate-y-0.5 active:translate-y-0 shadow-[0_4px_0_#d9ded8] disabled:opacity-60"
+              >
+                <span>{submitting ? 'Authenticating…' : 'Open admin workspace'}</span>
+                <FiArrowRight className="h-5 w-5" />
+              </button>
+            </form>
+
+            <p className="mt-5 text-xs text-[#87a59d]">
+              Only authorized quiz administrators can continue.
+            </p>
+          </section>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
