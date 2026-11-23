@@ -1,29 +1,33 @@
+'use client';
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../api/axios';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    try {
-      const savedUser = localStorage.getItem('quizapp_user');
-      return savedUser ? JSON.parse(savedUser) : null;
-    } catch {
-      return null;
-    }
-  });
-
-  const [token, setToken] = useState(() => {
-    return localStorage.getItem('quizapp_token') || null;
-  });
-
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Validate stored token on mount
+  // Validate stored token on mount (client-side only)
   useEffect(() => {
     const initAuth = async () => {
+      if (typeof window === 'undefined') return;
+
       const storedToken = localStorage.getItem('quizapp_token');
+      const storedUser = localStorage.getItem('quizapp_user');
+
       if (storedToken) {
+        setToken(storedToken);
+        if (storedUser) {
+          try {
+            setUser(JSON.parse(storedUser));
+          } catch {
+            // ignore JSON error
+          }
+        }
+
         try {
           const res = await api.get('/auth/me');
           const userData = res.data.user || res.data;
@@ -49,11 +53,15 @@ export const AuthProvider = ({ children }) => {
     const { token: newToken, user: userData } = response.data;
 
     if (newToken) {
-      localStorage.setItem('quizapp_token', newToken);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('quizapp_token', newToken);
+      }
       setToken(newToken);
     }
     if (userData) {
-      localStorage.setItem('quizapp_user', JSON.stringify(userData));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('quizapp_user', JSON.stringify(userData));
+      }
       setUser(userData);
     }
 
@@ -65,11 +73,15 @@ export const AuthProvider = ({ children }) => {
     const { token: newToken, user: userData } = response.data;
 
     if (newToken) {
-      localStorage.setItem('quizapp_token', newToken);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('quizapp_token', newToken);
+      }
       setToken(newToken);
     }
     if (userData) {
-      localStorage.setItem('quizapp_user', JSON.stringify(userData));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('quizapp_user', JSON.stringify(userData));
+      }
       setUser(userData);
     }
 
@@ -77,8 +89,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('quizapp_token');
-    localStorage.removeItem('quizapp_user');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('quizapp_token');
+      localStorage.removeItem('quizapp_user');
+    }
     setToken(null);
     setUser(null);
   };

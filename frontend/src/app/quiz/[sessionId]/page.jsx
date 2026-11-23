@@ -1,9 +1,12 @@
+'use client';
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import api from '../api/axios';
-import QuestionCard from '../components/QuestionCard';
-import Timer from '../components/Timer';
-import LoadingSpinner from '../components/LoadingSpinner';
+import { useParams, useRouter } from 'next/navigation';
+import api from '../../../api/axios';
+import ProtectedRoute from '../../../components/ProtectedRoute';
+import QuestionCard from '../../../components/QuestionCard';
+import Timer from '../../../components/Timer';
+import LoadingSpinner from '../../../components/LoadingSpinner';
 import {
   FiCheckCircle,
   FiArrowLeft,
@@ -15,22 +18,23 @@ import {
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
-const QuizPlay = () => {
-  const { sessionId } = useParams();
-  const navigate = useNavigate();
-  const location = useLocation();
+function QuizPlayContent() {
+  const params = useParams();
+  const sessionId = params?.sessionId;
+  const router = useRouter();
 
   // Attempt & Session State
-  const [session, setSession] = useState(location.state?.session || null);
-  const [attempt, setAttempt] = useState(location.state?.attempt || null);
-  const [questions, setQuestions] = useState(location.state?.questions || []);
-  const [loading, setLoading] = useState(!location.state?.questions);
+  const [session, setSession] = useState(null);
+  const [attempt, setAttempt] = useState(null);
+  const [questions, setQuestions] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Active question index
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Answers map: { [questionId]: 'A' | 'B' | 'C' | 'D' }
   const [answers, setAnswers] = useState(() => {
+    if (typeof window === 'undefined') return {};
     try {
       const saved = sessionStorage.getItem(`quiz_answers_${sessionId}`);
       return saved ? JSON.parse(saved) : {};
@@ -43,68 +47,68 @@ const QuizPlay = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const hasAutoSubmittedRef = useRef(false);
 
-  // Cache attempt and session data in sessionStorage
+  // Cache answers to sessionStorage
   useEffect(() => {
-    if (session && attempt && questions.length > 0) {
-      sessionStorage.setItem(
-        `quiz_data_${sessionId}`,
-        JSON.stringify({ session, attempt, questions })
-      );
+    if (typeof window !== 'undefined' && sessionId) {
+      sessionStorage.setItem(`quiz_answers_${sessionId}`, JSON.stringify(answers));
     }
-  }, [session, attempt, questions, sessionId]);
-
-  // Persist answers
-  useEffect(() => {
-    sessionStorage.setItem(`quiz_answers_${sessionId}`, JSON.stringify(answers));
   }, [answers, sessionId]);
 
-  // If page was loaded directly without location.state, recover from storage or fetch
+  // Load quiz attempt, session, and questions
   useEffect(() => {
-    if (!session || !attempt || questions.length === 0) {
+    if (!sessionId) return;
+
+    if (typeof window !== 'undefined') {
       const cached = sessionStorage.getItem(`quiz_data_${sessionId}`);
       if (cached) {
         try {
           const parsed = JSON.parse(cached);
           setSession(parsed.session);
           setAttempt(parsed.attempt);
-          setQuestions(parsed.questions);
+          setQuestions(parsed.questions || []);
           setLoading(false);
           return;
         } catch (e) {
           console.error('Failed to parse cached quiz data:', e);
         }
       }
-
-      // If not cached, attempt to query live session details
-      const recoverSession = async () => {
-        try {
-          setLoading(true);
-          const res = await api.get('/quiz/sessions');
-          const list = Array.isArray(res.data) ? res.data : res.data.sessions || [];
-          const found = list.find((s) => (s.id || s._id) === sessionId);
-          if (found && found.join_code) {
-            const joinRes = await api.post('/quiz/sessions/join', {
-              join_code: found.join_code,
-            });
-            setSession(joinRes.data.session);
-            setAttempt(joinRes.data.attempt);
-            setQuestions(joinRes.data.questions || []);
-          } else {
-            toast.error('Session not active or join code missing');
-            navigate('/dashboard', { replace: true });
-          }
-        } catch (err) {
-          console.error('Session recovery failed:', err);
-          toast.error('Unable to load quiz session');
-          navigate('/dashboard', { replace: true });
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      recoverSession();
     }
-  }, [sessionId, session, attempt, questions.length, navigate]);
+
+    // Recover or fetch live session details
+    const recoverSession = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get('/quiz/sessions');
+        const list = Array.isArray(res.data) ? res.data : res.data.sessions || [];
+        const found = list.find((s) => (s.id || s._id) === sessionId);
+        if (found && found.join_code) {
+          const joinRes = await api.post('/quiz/sessions/join', {
+            join_code: found.join_code,
+          });
+          setSession(joinRes.data.session);
+          setAttempt(joinRes.data.attempt);
+          setQuestions(joinRes.data.questions || []);
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem(
+              `quiz_data_${sessionId}`,
+              JSON.stringify(joinRes.data)
+            );
+          }
+        } else {
+          toast.error('Session not active or join code missing');
+          router.replace('/dashboard');
+        }
+      } catch (err) {
+        console.error('Session recovery failed:', err);
+        toast.error('Unable to load quiz session');
+        router.replace('/dashboard');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    recoverSession();
+  }, [sessionId, router]);
 
   // Warn before leaving page during active quiz
   useEffect(() => {
@@ -142,7 +146,6 @@ const QuizPlay = () => {
       setIsSubmitting(true);
       setShowConfirmModal(false);
 
-      // Build payload matching { answers: [{ question_id, selected_option }] }
       const answersPayload = questions.map((q) => {
         const qId = q.id || q._id;
         return {
@@ -155,22 +158,21 @@ const QuizPlay = () => {
         answers: answersPayload,
       });
 
-      // Clear storage for this session
-      sessionStorage.removeItem(`quiz_answers_${sessionId}`);
-      sessionStorage.removeItem(`quiz_data_${sessionId}`);
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem(`quiz_answers_${sessionId}`);
+        sessionStorage.removeItem(`quiz_data_${sessionId}`);
+        sessionStorage.setItem(`quiz_result_${attemptId}`, JSON.stringify(res.data));
+      }
 
       toast.success('Quiz submitted successfully!');
-      navigate(`/results/${attemptId}`, {
-        replace: true,
-        state: { result: res.data },
-      });
+      router.replace(`/results/${attemptId}`);
     } catch (err) {
       console.error('Submit quiz error:', err);
       const msg = err.response?.data?.message || err.response?.data?.error || 'Failed to submit quiz';
       toast.error(msg);
       setIsSubmitting(false);
     }
-  }, [attempt, questions, answers, sessionId, navigate]);
+  }, [attempt, questions, answers, sessionId, router]);
 
   const handleTimeUp = useCallback(() => {
     if (!hasAutoSubmittedRef.current) {
@@ -196,7 +198,7 @@ const QuizPlay = () => {
           This quiz session does not have any questions yet.
         </p>
         <button
-          onClick={() => navigate('/dashboard')}
+          onClick={() => router.push('/dashboard')}
           className="px-5 py-2.5 rounded-xl font-semibold text-sm text-white bg-indigo-600 hover:bg-indigo-700"
         >
           Return to Dashboard
@@ -213,7 +215,6 @@ const QuizPlay = () => {
   const unansweredCount = questions.length - answeredCount;
   const progressPercent = Math.round((answeredCount / questions.length) * 100);
 
-  // Calculate timer values
   const durationMs = (session?.duration_minutes || 15) * 60 * 1000;
   const startedAt = attempt?.started_at || attempt?.created_at || new Date().toISOString();
 
@@ -434,6 +435,12 @@ const QuizPlay = () => {
       )}
     </div>
   );
-};
+}
 
-export default QuizPlay;
+export default function QuizPlayPage() {
+  return (
+    <ProtectedRoute requiredRole="student">
+      <QuizPlayContent />
+    </ProtectedRoute>
+  );
+}

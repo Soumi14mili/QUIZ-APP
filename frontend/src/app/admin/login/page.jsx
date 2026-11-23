@@ -1,17 +1,20 @@
+'use client';
+
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../../../context/AuthContext';
 import { FiMail, FiLock, FiEye, FiEyeOff, FiShield, FiArrowRight } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
-const AdminLogin = () => {
+export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const { login } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,7 +27,7 @@ const AdminLogin = () => {
       setSubmitting(true);
       await login(email, password, true);
       toast.success('Admin authentication verified');
-      navigate('/admin/dashboard', { replace: true });
+      router.push('/admin/dashboard');
     } catch (err) {
       console.error('Admin login error:', err);
       const msg = err.response?.data?.message || err.response?.data?.error || 'Invalid administrator credentials';
@@ -114,7 +117,7 @@ const AdminLogin = () => {
         {/* Footer links */}
         <div className="pt-4 border-t border-slate-700/60 text-center">
           <Link
-            to="/login"
+            href="/login"
             className="text-xs font-semibold text-slate-400 hover:text-indigo-400 transition-colors inline-flex items-center space-x-1"
           >
             <span>← Back to Student Login</span>
@@ -123,6 +126,4 @@ const AdminLogin = () => {
       </div>
     </div>
   );
-};
-
-export default AdminLogin;
+}

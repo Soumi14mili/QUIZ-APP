@@ -1,10 +1,13 @@
+'use client';
+
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../../context/AuthContext';
 import { FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiCheckSquare, FiArrowRight } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
-const Register = () => {
+export default function RegisterPage() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -13,7 +16,7 @@ const Register = () => {
   const [submitting, setSubmitting] = useState(false);
 
   const { register } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,7 +40,7 @@ const Register = () => {
       setSubmitting(true);
       await register(fullName.trim(), email.trim(), password);
       toast.success('Account created successfully!');
-      navigate('/dashboard', { replace: true });
+      router.push('/dashboard');
     } catch (err) {
       console.error('Registration error:', err);
       const msg = err.response?.data?.message || err.response?.data?.error || 'Failed to create account';
@@ -167,13 +170,11 @@ const Register = () => {
         {/* Footer links */}
         <div className="pt-4 border-t border-slate-100 text-center text-sm text-slate-600">
           Already have an account?{' '}
-          <Link to="/login" className="font-semibold text-indigo-600 hover:text-indigo-700">
+          <Link href="/login" className="font-semibold text-indigo-600 hover:text-indigo-700">
             Sign in
           </Link>
         </div>
       </div>
     </div>
   );
-};
-
-export default Register;
+}

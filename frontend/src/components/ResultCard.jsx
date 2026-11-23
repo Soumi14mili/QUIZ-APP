@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { FiCheck, FiX, FiHelpCircle } from 'react-icons/fi';
 
@@ -70,19 +72,16 @@ const ResultCard = ({
           let icon = null;
 
           if (isThisCorrect && isThisSelected) {
-            // Selected and correct
             optionStyle = 'border-emerald-500 bg-emerald-50 text-emerald-950 ring-2 ring-emerald-500/30';
             badgeLabel = 'Your Answer (Correct)';
             badgeStyle = 'bg-emerald-600 text-white';
             icon = <FiCheck className="w-4 h-4 text-emerald-600" />;
           } else if (isThisCorrect && !isThisSelected) {
-            // Correct answer, not selected by student
             optionStyle = 'border-emerald-500 bg-emerald-50 text-emerald-950 ring-2 ring-emerald-500/20';
             badgeLabel = 'Correct Answer';
             badgeStyle = 'bg-emerald-600 text-white';
             icon = <FiCheck className="w-4 h-4 text-emerald-600" />;
           } else if (isThisSelected && !isThisCorrect) {
-            // Selected but incorrect
             optionStyle = 'border-rose-400 bg-rose-50 text-rose-950 ring-2 ring-rose-400/20';
             badgeLabel = 'Your Answer (Incorrect)';
             badgeStyle = 'bg-rose-600 text-white';

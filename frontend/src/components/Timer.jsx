@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect, useRef } from 'react';
 import { FiClock, FiAlertTriangle } from 'react-icons/fi';
 
@@ -50,7 +52,6 @@ const Timer = ({ durationMs, startedAt, onTimeUp }) => {
   const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
   // Color styles based on thresholds
-  // yellow < 5min (300,000ms), red < 1min (60,000ms), pulsing < 30sec (30,000ms)
   let statusClasses = 'bg-indigo-50 border-indigo-200 text-indigo-700';
   let badgeText = 'Time Remaining';
 

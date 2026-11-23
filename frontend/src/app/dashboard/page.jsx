@@ -1,8 +1,11 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../api/axios';
-import { useAuth } from '../context/AuthContext';
-import LoadingSpinner from '../components/LoadingSpinner';
+import { useRouter } from 'next/navigation';
+import api from '../../api/axios';
+import { useAuth } from '../../context/AuthContext';
+import ProtectedRoute from '../../components/ProtectedRoute';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import {
   FiHash,
   FiPlay,
@@ -15,7 +18,7 @@ import {
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
-const StudentDashboard = () => {
+function StudentDashboardContent() {
   const { user } = useAuth();
   const [joinCode, setJoinCode] = useState('');
   const [sessions, setSessions] = useState([]);
@@ -23,13 +26,12 @@ const StudentDashboard = () => {
   const [joining, setJoining] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const fetchSessions = async (isManualRefresh = false) => {
     if (isManualRefresh) setRefreshing(true);
     try {
       const response = await api.get('/quiz/sessions');
-      // The response may be an array or { sessions: [...] }
       const sessionList = Array.isArray(response.data) ? response.data : response.data.sessions || [];
       setSessions(sessionList);
     } catch (err) {
@@ -57,11 +59,17 @@ const StudentDashboard = () => {
       const res = await api.post('/quiz/sessions/join', { join_code: code });
       const { attempt, session, questions } = res.data;
 
+      const sessionId = session.id || session._id;
+      // Store in sessionStorage for resilient Next.js client retrieval
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem(
+          `quiz_data_${sessionId}`,
+          JSON.stringify({ attempt, session, questions })
+        );
+      }
+
       toast.success('Joined quiz successfully!');
-      // Navigate to the quiz player, passing loaded data via state to optimize loading
-      navigate(`/quiz/${session.id || session._id}`, {
-        state: { attempt, session, questions },
-      });
+      router.push(`/quiz/${sessionId}`);
     } catch (err) {
       console.error('Join quiz error:', err);
       const errorMsg =
@@ -136,7 +144,7 @@ const StudentDashboard = () => {
       </section>
 
       {/* Section 2: Available Quizzes */}
-      <section className="space-y-6">
+      <section id="quizzes" className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-slate-900">Available Live Quizzes</h2>
@@ -216,7 +224,7 @@ const StudentDashboard = () => {
                   <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-2">
                     {hasAttempted && attemptId ? (
                       <button
-                        onClick={() => navigate(`/results/${attemptId}`)}
+                        onClick={() => router.push(`/results/${attemptId}`)}
                         className="flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors flex items-center justify-center space-x-1.5"
                       >
                         <FiCheckCircle className="w-4 h-4" />
@@ -233,7 +241,7 @@ const StudentDashboard = () => {
                     )}
 
                     <button
-                      onClick={() => navigate(`/leaderboard/${sessionId}`)}
+                      onClick={() => router.push(`/leaderboard/${sessionId}`)}
                       title="View Leaderboard"
                       className="p-2.5 rounded-xl text-slate-600 hover:text-indigo-600 hover:bg-slate-100 border border-slate-200 transition-colors"
                     >
@@ -248,6 +256,12 @@ const StudentDashboard = () => {
       </section>
     </div>
   );
-};
+}
 
-export default StudentDashboard;
+export default function StudentDashboardPage() {
+  return (
+    <ProtectedRoute requiredRole="student">
+      <StudentDashboardContent />
+    </ProtectedRoute>
+  );
+}

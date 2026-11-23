@@ -1,8 +1,11 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../api/axios';
-import SessionForm from './SessionForm';
-import LoadingSpinner from '../components/LoadingSpinner';
+import { useRouter } from 'next/navigation';
+import api from '../../../api/axios';
+import ProtectedRoute from '../../../components/ProtectedRoute';
+import SessionForm from '../../../components/SessionForm';
+import LoadingSpinner from '../../../components/LoadingSpinner';
 import {
   FiPlus,
   FiEdit,
@@ -19,7 +22,7 @@ import {
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
-const AdminDashboard = () => {
+function AdminDashboardContent() {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSessionForEdit, setSelectedSessionForEdit] = useState(null);
@@ -27,7 +30,7 @@ const AdminDashboard = () => {
   const [filterStatus, setFilterStatus] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const fetchSessions = async () => {
     try {
@@ -309,7 +312,7 @@ const AdminDashboard = () => {
                 <div className="mt-6 pt-4 border-t border-slate-100 space-y-2">
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => navigate(`/admin/sessions/${sessionId}/questions`)}
+                      onClick={() => router.push(`/admin/sessions/${sessionId}/questions`)}
                       className="flex-1 py-2 px-3 rounded-xl text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors flex items-center justify-center space-x-1.5"
                     >
                       <FiHelpCircle className="w-3.5 h-3.5" />
@@ -317,7 +320,7 @@ const AdminDashboard = () => {
                     </button>
 
                     <button
-                      onClick={() => navigate(`/leaderboard/${sessionId}`)}
+                      onClick={() => router.push(`/leaderboard/${sessionId}`)}
                       title="View Leaderboard"
                       className="p-2 rounded-xl text-slate-600 hover:text-indigo-600 hover:bg-slate-100 border border-slate-200 transition-colors"
                     >
@@ -369,6 +372,12 @@ const AdminDashboard = () => {
       />
     </div>
   );
-};
+}
 
-export default AdminDashboard;
+export default function AdminDashboardPage() {
+  return (
+    <ProtectedRoute requiredRole="admin">
+      <AdminDashboardContent />
+    </ProtectedRoute>
+  );
+}

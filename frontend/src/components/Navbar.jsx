@@ -1,5 +1,8 @@
+'use client';
+
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { FiLogOut, FiUser, FiAward, FiGrid, FiMenu, FiX, FiCheckSquare } from 'react-icons/fi';
 import toast from 'react-hot-toast';
@@ -7,20 +10,25 @@ import toast from 'react-hot-toast';
 const Navbar = () => {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Hide Navbar completely on the full-screen quiz play page
+  if (pathname?.startsWith('/quiz/')) {
+    return null;
+  }
 
   const handleLogout = () => {
     logout();
     toast.success('Successfully logged out');
     if (isAdmin) {
-      navigate('/admin/login');
+      router.push('/admin/login');
     } else {
-      navigate('/login');
+      router.push('/login');
     }
   };
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => pathname === path;
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
@@ -28,7 +36,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link
-            to={isAuthenticated ? (isAdmin ? '/admin/dashboard' : '/dashboard') : '/login'}
+            href={isAuthenticated ? (isAdmin ? '/admin/dashboard' : '/dashboard') : '/login'}
             className="flex items-center space-x-2.5 group"
           >
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform duration-200">
@@ -52,7 +60,7 @@ const Navbar = () => {
               <nav className="flex items-center space-x-2">
                 {isAdmin ? (
                   <Link
-                    to="/admin/dashboard"
+                    href="/admin/dashboard"
                     className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                       isActive('/admin/dashboard')
                         ? 'bg-indigo-50 text-indigo-700'
@@ -65,7 +73,7 @@ const Navbar = () => {
                 ) : (
                   <>
                     <Link
-                      to="/dashboard"
+                      href="/dashboard"
                       className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                         isActive('/dashboard')
                           ? 'bg-indigo-50 text-indigo-700'
@@ -76,7 +84,7 @@ const Navbar = () => {
                       <span>Dashboard</span>
                     </Link>
                     <Link
-                      to="/dashboard#quizzes"
+                      href="/dashboard#quizzes"
                       className="flex items-center space-x-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
                     >
                       <FiAward className="w-4 h-4" />
@@ -115,13 +123,13 @@ const Navbar = () => {
           ) : (
             <div className="hidden md:flex items-center space-x-3">
               <Link
-                to="/login"
+                href="/login"
                 className="px-4 py-2 text-sm font-medium text-slate-700 hover:text-indigo-600 transition-colors"
               >
                 Log In
               </Link>
               <Link
-                to="/register"
+                href="/register"
                 className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm hover:shadow transition-all"
               >
                 Sign Up
@@ -159,7 +167,7 @@ const Navbar = () => {
 
               {isAdmin ? (
                 <Link
-                  to="/admin/dashboard"
+                  href="/admin/dashboard"
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center space-x-2 px-3 py-2.5 rounded-lg text-sm font-medium ${
                     isActive('/admin/dashboard') ? 'bg-indigo-50 text-indigo-700' : 'text-slate-700 hover:bg-slate-50'
@@ -171,7 +179,7 @@ const Navbar = () => {
               ) : (
                 <>
                   <Link
-                    to="/dashboard"
+                    href="/dashboard"
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center space-x-2 px-3 py-2.5 rounded-lg text-sm font-medium ${
                       isActive('/dashboard') ? 'bg-indigo-50 text-indigo-700' : 'text-slate-700 hover:bg-slate-50'
@@ -181,7 +189,7 @@ const Navbar = () => {
                     <span>Dashboard</span>
                   </Link>
                   <Link
-                    to="/dashboard#quizzes"
+                    href="/dashboard#quizzes"
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center space-x-2 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50"
                   >
@@ -207,14 +215,14 @@ const Navbar = () => {
           ) : (
             <div className="space-y-2 pt-1">
               <Link
-                to="/login"
+                href="/login"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block w-full text-center py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg"
               >
                 Log In
               </Link>
               <Link
-                to="/register"
+                href="/register"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block w-full text-center py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm"
               >

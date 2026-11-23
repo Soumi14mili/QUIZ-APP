@@ -1,8 +1,11 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
-import api from '../api/axios';
-import ResultCard from '../components/ResultCard';
-import LoadingSpinner from '../components/LoadingSpinner';
+import { useParams, useRouter } from 'next/navigation';
+import api from '../../../api/axios';
+import ProtectedRoute from '../../../components/ProtectedRoute';
+import ResultCard from '../../../components/ResultCard';
+import LoadingSpinner from '../../../components/LoadingSpinner';
 import {
   FiAward,
   FiClock,
@@ -10,7 +13,6 @@ import {
   FiXCircle,
   FiArrowLeft,
   FiBarChart2,
-  FiCheck,
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
@@ -23,16 +25,13 @@ const formatTimeTaken = (ms) => {
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 };
 
-const Results = () => {
-  const { attemptId } = useParams();
-  const navigate = useNavigate();
-  const location = useLocation();
+function ResultsContent() {
+  const params = useParams();
+  const attemptId = params?.attemptId;
+  const router = useRouter();
 
   const [resultData, setResultData] = useState(() => {
-    if (location.state?.result) {
-      sessionStorage.setItem(`quiz_result_${attemptId}`, JSON.stringify(location.state.result));
-      return location.state.result;
-    }
+    if (typeof window === 'undefined') return null;
     try {
       const cached = sessionStorage.getItem(`quiz_result_${attemptId}`);
       return cached ? JSON.parse(cached) : null;
@@ -44,18 +43,20 @@ const Results = () => {
   const [loading, setLoading] = useState(!resultData);
 
   useEffect(() => {
+    if (!attemptId) return;
+
     if (!resultData) {
       const fetchResult = async () => {
         try {
           setLoading(true);
-          // Try fetching attempt details if endpoint exists
           const res = await api.get(`/quiz/attempts/${attemptId}`);
           const data = res.data.attempt || res.data;
           setResultData(data);
-          sessionStorage.setItem(`quiz_result_${attemptId}`, JSON.stringify(data));
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem(`quiz_result_${attemptId}`, JSON.stringify(data));
+          }
         } catch (err) {
           console.error('Failed to load result from server:', err);
-          // If direct endpoint isn't available, notify user
           toast.error('Unable to fetch detailed attempt summary');
         } finally {
           setLoading(false);
@@ -81,7 +82,7 @@ const Results = () => {
           The requested attempt result could not be found or has expired.
         </p>
         <button
-          onClick={() => navigate('/dashboard')}
+          onClick={() => router.push('/dashboard')}
           className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm"
         >
           Return to Dashboard
@@ -194,7 +195,7 @@ const Results = () => {
         <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-center gap-3">
           {sessionId && (
             <button
-              onClick={() => navigate(`/leaderboard/${sessionId}`)}
+              onClick={() => router.push(`/leaderboard/${sessionId}`)}
               className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-200 transition-all"
             >
               <FiAward className="w-4 h-4" />
@@ -203,7 +204,7 @@ const Results = () => {
           )}
 
           <button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => router.push('/dashboard')}
             className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-6 py-3 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
           >
             <FiArrowLeft className="w-4 h-4" />
@@ -252,6 +253,12 @@ const Results = () => {
       )}
     </div>
   );
-};
+}
 
-export default Results;
+export default function ResultsPage() {
+  return (
+    <ProtectedRoute requiredRole="student">
+      <ResultsContent />
+    </ProtectedRoute>
+  );
+}

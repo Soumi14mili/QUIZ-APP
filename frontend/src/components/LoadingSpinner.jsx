@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 
 const LoadingSpinner = ({ size = 'md', message = 'Loading...', fullScreen = false }) => {

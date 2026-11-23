@@ -1,20 +1,20 @@
+'use client';
+
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../../context/AuthContext';
 import { FiMail, FiLock, FiEye, FiEyeOff, FiCheckSquare, FiArrowRight } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
-const Login = () => {
+export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const { login } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const from = location.state?.from?.pathname || '/dashboard';
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,7 +27,7 @@ const Login = () => {
       setSubmitting(true);
       await login(email, password, false);
       toast.success('Welcome back!');
-      navigate(from, { replace: true });
+      router.push('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
       const msg = err.response?.data?.message || err.response?.data?.error || 'Invalid email or password';
@@ -118,12 +118,12 @@ const Login = () => {
         <div className="pt-4 border-t border-slate-100 flex flex-col items-center space-y-3 text-sm">
           <p className="text-slate-600">
             Don't have an account?{' '}
-            <Link to="/register" className="font-semibold text-indigo-600 hover:text-indigo-700">
+            <Link href="/register" className="font-semibold text-indigo-600 hover:text-indigo-700">
               Create an account
             </Link>
           </p>
           <Link
-            to="/admin/login"
+            href="/admin/login"
             className="inline-flex items-center text-xs font-semibold text-slate-400 hover:text-indigo-600 transition-colors"
           >
             Looking for Admin Portal? Switch to Admin Login →
@@ -132,6 +132,4 @@ const Login = () => {
       </div>
     </div>
   );
-};
-
-export default Login;
+}

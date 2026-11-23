@@ -1,7 +1,10 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import api from '../api/axios';
-import LoadingSpinner from '../components/LoadingSpinner';
+import { useParams, useRouter } from 'next/navigation';
+import api from '../../../../../api/axios';
+import ProtectedRoute from '../../../../../components/ProtectedRoute';
+import LoadingSpinner from '../../../../../components/LoadingSpinner';
 import {
   FiArrowLeft,
   FiPlus,
@@ -14,9 +17,10 @@ import {
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
-const QuestionManager = () => {
-  const { id: sessionId } = useParams();
-  const navigate = useNavigate();
+function QuestionManagerContent() {
+  const params = useParams();
+  const sessionId = params?.id;
+  const router = useRouter();
 
   const [session, setSession] = useState(null);
   const [questions, setQuestions] = useState([]);
@@ -36,6 +40,7 @@ const QuestionManager = () => {
   const [correctOption, setCorrectOption] = useState('A');
 
   const fetchSessionAndQuestions = async () => {
+    if (!sessionId) return;
     try {
       setLoading(true);
       const [sessionRes, questionsRes] = await Promise.all([
@@ -146,7 +151,7 @@ const QuestionManager = () => {
       {/* Navigation & Header */}
       <div className="space-y-4">
         <button
-          onClick={() => navigate('/admin/dashboard')}
+          onClick={() => router.push('/admin/dashboard')}
           className="inline-flex items-center space-x-1.5 text-sm font-semibold text-slate-500 hover:text-indigo-600 transition-colors"
         >
           <FiArrowLeft className="w-4 h-4" />
@@ -402,6 +407,12 @@ const QuestionManager = () => {
       )}
     </div>
   );
-};
+}
 
-export default QuestionManager;
+export default function QuestionManagerPage() {
+  return (
+    <ProtectedRoute requiredRole="admin">
+      <QuestionManagerContent />
+    </ProtectedRoute>
+  );
+}

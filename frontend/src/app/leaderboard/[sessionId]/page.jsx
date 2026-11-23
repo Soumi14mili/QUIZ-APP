@@ -1,16 +1,17 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import api from '../api/axios';
-import { useAuth } from '../context/AuthContext';
-import LoadingSpinner from '../components/LoadingSpinner';
+import { useParams, useRouter } from 'next/navigation';
+import api from '../../../api/axios';
+import { useAuth } from '../../../context/AuthContext';
+import ProtectedRoute from '../../../components/ProtectedRoute';
+import LoadingSpinner from '../../../components/LoadingSpinner';
 import {
   FiAward,
   FiClock,
   FiArrowLeft,
   FiRefreshCw,
   FiUser,
-  FiStar,
-  FiUsers,
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
@@ -23,10 +24,11 @@ const formatTimeTaken = (ms) => {
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 };
 
-const Leaderboard = () => {
-  const { sessionId } = useParams();
+function LeaderboardContent() {
+  const params = useParams();
+  const sessionId = params?.sessionId;
   const { user, isAdmin } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const [leaderboard, setLeaderboard] = useState([]);
   const [sessionTitle, setSessionTitle] = useState('');
@@ -34,9 +36,9 @@ const Leaderboard = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchLeaderboard = async (isManual = false) => {
+    if (!sessionId) return;
     if (isManual) setRefreshing(true);
     try {
-      // Fetch leaderboard
       const res = await api.get(`/leaderboard/sessions/${sessionId}`);
       const data = res.data;
       const list = Array.isArray(data)
@@ -47,7 +49,6 @@ const Leaderboard = () => {
       if (data.session?.title || data.session_title) {
         setSessionTitle(data.session?.title || data.session_title);
       } else {
-        // Try to fetch session title from quiz or admin endpoint
         try {
           const sRes = isAdmin
             ? await api.get(`/admin/sessions/${sessionId}`)
@@ -60,7 +61,7 @@ const Leaderboard = () => {
             if (cur) setSessionTitle(cur.title);
           }
         } catch {
-          // Ignore secondary session title error
+          // Ignore secondary session title lookup error
         }
       }
     } catch (err) {
@@ -111,7 +112,7 @@ const Leaderboard = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <button
-            onClick={() => navigate(isAdmin ? '/admin/dashboard' : '/dashboard')}
+            onClick={() => router.push(isAdmin ? '/admin/dashboard' : '/dashboard')}
             className="inline-flex items-center space-x-1.5 text-xs font-semibold text-slate-500 hover:text-indigo-600 mb-2 transition-colors"
           >
             <FiArrowLeft className="w-3.5 h-3.5" />
@@ -157,7 +158,7 @@ const Leaderboard = () => {
             Be the first student to complete this quiz and claim the #1 spot on the leaderboard!
           </p>
           <button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => router.push('/dashboard')}
             className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-all"
           >
             <span>Go to Dashboard</span>
@@ -165,7 +166,7 @@ const Leaderboard = () => {
         </div>
       ) : (
         <div className="space-y-6">
-          {/* Top 3 Podium Cards (for desktop & tablet) */}
+          {/* Top 3 Podium Cards */}
           {leaderboard.length >= 2 && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
               {/* Rank 2 */}
@@ -329,6 +330,12 @@ const Leaderboard = () => {
       )}
     </div>
   );
-};
+}
 
-export default Leaderboard;
+export default function LeaderboardPage() {
+  return (
+    <ProtectedRoute>
+      <LeaderboardContent />
+    </ProtectedRoute>
+  );
+}
