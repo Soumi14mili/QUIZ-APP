@@ -7,6 +7,13 @@ import ProtectedRoute from '../../../components/ProtectedRoute';
 import SessionForm from '../../../components/SessionForm';
 import LoadingSpinner from '../../../components/LoadingSpinner';
 import ThemeToggle from '../../../components/ThemeToggle';
+import { useTheme } from '../../../context/ThemeContext';
+import {
+  KawaiiCloud,
+  KawaiiServerRack,
+  KawaiiS3Cup,
+  StarSparkle,
+} from '../../../components/Caricatures';
 import {
   FiPlus,
   FiEdit,
@@ -31,6 +38,7 @@ function AdminDashboardContent() {
   const [filterStatus, setFilterStatus] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
+  const { isDark } = useTheme();
   const router = useRouter();
 
   const fetchSessions = async () => {
@@ -131,23 +139,45 @@ function AdminDashboardContent() {
   return (
     <div className="min-h-screen bg-[#f5f3ec] dark:bg-[#0c0a23] text-[#18332c] dark:text-[#f0eeff] transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
-        {/* Top Banner & Title */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div>
-            <span className="inline-block px-3.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-[#b5e7d2] dark:bg-[#5ce1e6] text-[#173c34] dark:text-[#0c0a23] border border-[#173c34] dark:border-[#7c6cff] mb-2 shadow-[2px_2px_0_#173c34] dark:shadow-[2px_2px_0_#7c6cff]">
-              Instructor Console
-            </span>
-            <h1 className="font-display text-3xl sm:text-4xl font-normal text-[#173c34] dark:text-[#f0eeff] tracking-tight">
-              Session & Question Manager
-            </h1>
-            <p className="text-sm text-[#173c34]/70 dark:text-[#aca8d8] mt-1">
-              Author and orchestrate live quiz arenas, manage question pools, and inspect rankings
-            </p>
+        
+        {/* ======================================================== */}
+        {/* 1. TOP HERO BANNER with FLOATING PROFESSOR CLOUD CARICATURE */}
+        {/* ======================================================== */}
+        <div className="relative rounded-[2.5rem] bg-white dark:bg-[#1a1644] p-6 sm:p-8 border-2 border-[#18332c] dark:border-[#352f76] shadow-[8px_8px_0_#18332c] dark:shadow-[8px_8px_0_#7c6cff] flex flex-col md:flex-row items-start md:items-center justify-between gap-6 overflow-hidden transition-all">
+          
+          {/* Subtle background cartoon caricature */}
+          <div className="absolute -right-4 -bottom-6 opacity-15 dark:opacity-20 pointer-events-none select-none">
+            <KawaiiServerRack className="w-40 h-48" isDark={isDark} />
           </div>
 
-          <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex items-center gap-5 z-10">
+            {/* Cute Professor Cloud Caricature with Graduation Cap & Glasses! */}
+            <div className="flex-shrink-0">
+              <KawaiiCloud variant="professor" className="w-24 h-20 sm:w-28 sm:h-22" isDark={isDark} />
+            </div>
+
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-block px-3.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-[#b5e7d2] dark:bg-[#5ce1e6] text-[#173c34] dark:text-[#0c0a23] border border-[#173c34] dark:border-[#7c6cff] shadow-[2px_2px_0_#173c34] dark:shadow-[2px_2px_0_#7c6cff]">
+                  Instructor Console
+                </span>
+                <span className="text-xs font-bold text-[#e65f45] dark:text-[#ff6fb5] flex items-center gap-1">
+                  <StarSparkle className="w-3.5 h-3.5 text-[#f6c453] dark:text-[#5ce1e6]" />
+                  <span>Live Arena</span>
+                </span>
+              </div>
+              <h1 className="font-display text-3xl sm:text-4xl font-normal text-[#173c34] dark:text-[#f0eeff] tracking-tight">
+                Session &amp; Question Manager
+              </h1>
+              <p className="text-sm text-[#173c34]/70 dark:text-[#aca8d8] mt-1 max-w-xl">
+                Author and orchestrate live quiz arenas, manage question pools, and inspect real-time student rankings.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 flex-shrink-0 z-10">
             {/* Theme Toggle in Header */}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border-2 border-[#18332c] dark:border-[#7c6cff] bg-white dark:bg-[#1a1644] shadow-[2px_2px_0_#18332c] dark:shadow-[2px_2px_0_#7c6cff]">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border-2 border-[#18332c] dark:border-[#7c6cff] bg-white dark:bg-[#221d57] shadow-[2px_2px_0_#18332c] dark:shadow-[2px_2px_0_#7c6cff]">
               <span className="text-xs font-bold text-[#18332c] dark:text-[#aca8d8] hidden sm:inline">Theme:</span>
               <ThemeToggle />
             </div>
@@ -165,46 +195,65 @@ function AdminDashboardContent() {
           </div>
         </div>
 
-        {/* Metrics Row */}
+        {/* ======================================================== */}
+        {/* 2. METRICS ROW with FLOATING CARTOONS                    */}
+        {/* ======================================================== */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           {/* Total Sessions */}
-          <div className="bg-white dark:bg-[#1a1644] rounded-[2rem] p-6 border-2 border-[#173c34] dark:border-[#352f76] shadow-[6px_6px_0_#173c34] dark:shadow-[6px_6px_0_#7c6cff] flex items-center justify-between transition-all">
-            <div>
+          <div className="relative bg-white dark:bg-[#1a1644] rounded-[2rem] p-6 border-2 border-[#173c34] dark:border-[#352f76] shadow-[6px_6px_0_#173c34] dark:shadow-[6px_6px_0_#7c6cff] flex items-center justify-between transition-all overflow-hidden group">
+            {/* Cute peek-in server rack */}
+            <div className="absolute -right-2 -bottom-2 opacity-25 group-hover:opacity-40 transition-opacity pointer-events-none">
+              <KawaiiServerRack className="w-16 h-20" isDark={isDark} />
+            </div>
+
+            <div className="z-10">
               <p className="text-[11px] font-black uppercase tracking-wider text-[#173c34]/70 dark:text-[#aca8d8]">Total Sessions</p>
               <p className="font-display text-3xl sm:text-4xl font-bold text-[#173c34] dark:text-[#f0eeff] mt-1">{sessions.length}</p>
               <p className="text-xs text-[#173c34]/70 dark:text-[#aca8d8]/80 mt-1 font-semibold">{draftCount} in draft</p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-[#f7f4ec] dark:bg-[#221d57] border-2 border-[#173c34] dark:border-[#7c6cff] text-[#173c34] dark:text-[#5ce1e6] flex items-center justify-center shadow-[2px_2px_0_#173c34] dark:shadow-[2px_2px_0_#7c6cff]">
+            <div className="w-12 h-12 rounded-2xl bg-[#f7f4ec] dark:bg-[#221d57] border-2 border-[#173c34] dark:border-[#7c6cff] text-[#173c34] dark:text-[#5ce1e6] flex items-center justify-center shadow-[2px_2px_0_#173c34] dark:shadow-[2px_2px_0_#7c6cff] z-10">
               <FiLayers className="w-6 h-6" />
             </div>
           </div>
 
           {/* Live Now */}
-          <div className="bg-[#b5e7d2] dark:bg-[#2f2891] rounded-[2rem] p-6 border-2 border-[#173c34] dark:border-[#7c6cff] shadow-[6px_6px_0_#173c34] dark:shadow-[6px_6px_0_#7c6cff] text-[#173c34] dark:text-white flex items-center justify-between transition-all">
-            <div>
+          <div className="relative bg-[#b5e7d2] dark:bg-[#2f2891] rounded-[2rem] p-6 border-2 border-[#173c34] dark:border-[#7c6cff] shadow-[6px_6px_0_#173c34] dark:shadow-[6px_6px_0_#7c6cff] text-[#173c34] dark:text-white flex items-center justify-between transition-all overflow-hidden group">
+            {/* Cute floating cloud cheer */}
+            <div className="absolute right-12 -top-2 opacity-35 group-hover:opacity-60 transition-opacity pointer-events-none">
+              <KawaiiCloud className="w-18 h-12" isDark={isDark} />
+            </div>
+
+            <div className="z-10">
               <p className="text-[11px] font-black uppercase tracking-wider opacity-80 text-[#173c34] dark:text-[#5ce1e6]">Live Now</p>
               <p className="font-display text-3xl sm:text-4xl font-bold text-[#173c34] dark:text-white mt-1">{liveCount}</p>
               <p className="text-xs font-semibold opacity-80 mt-1 text-[#173c34] dark:text-[#aca8d8]">Accepting answers</p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#1a1644] border-2 border-[#173c34] dark:border-[#7c6cff] text-[#173c34] dark:text-[#5ce1e6] flex items-center justify-center shadow-[2px_2px_0_#173c34] dark:shadow-[2px_2px_0_#7c6cff]">
+            <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#1a1644] border-2 border-[#173c34] dark:border-[#7c6cff] text-[#173c34] dark:text-[#5ce1e6] flex items-center justify-center shadow-[2px_2px_0_#173c34] dark:shadow-[2px_2px_0_#7c6cff] z-10">
               <FiCheckCircle className="w-6 h-6 text-[#236653] dark:text-[#5ce1e6]" />
             </div>
           </div>
 
           {/* Total Submissions */}
-          <div className="bg-[#f7b955] dark:bg-[#5ce1e6] rounded-[2rem] p-6 border-2 border-[#173c34] dark:border-[#7c6cff] shadow-[6px_6px_0_#173c34] dark:shadow-[6px_6px_0_#7c6cff] text-[#173c34] dark:text-[#0c0a23] flex items-center justify-between transition-all">
-            <div>
+          <div className="relative bg-[#f7b955] dark:bg-[#5ce1e6] rounded-[2rem] p-6 border-2 border-[#173c34] dark:border-[#7c6cff] shadow-[6px_6px_0_#173c34] dark:shadow-[6px_6px_0_#7c6cff] text-[#173c34] dark:text-[#0c0a23] flex items-center justify-between transition-all overflow-hidden group">
+            {/* Cute floating S3 cup cheer */}
+            <div className="absolute right-14 -bottom-1 opacity-30 group-hover:opacity-60 transition-opacity pointer-events-none">
+              <KawaiiS3Cup className="w-14 h-18" isDark={isDark} />
+            </div>
+
+            <div className="z-10">
               <p className="text-[11px] font-black uppercase tracking-wider opacity-85 text-[#173c34] dark:text-[#0c0a23]">Total Submissions</p>
               <p className="font-display text-3xl sm:text-4xl font-bold text-[#173c34] dark:text-[#0c0a23] mt-1">{totalParticipants}</p>
               <p className="text-xs font-semibold opacity-85 mt-1 text-[#173c34] dark:text-[#0c0a23]/80">Across all cohorts</p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#1a1644] border-2 border-[#173c34] dark:border-[#7c6cff] text-[#173c34] dark:text-[#5ce1e6] flex items-center justify-center shadow-[2px_2px_0_#173c34] dark:shadow-[2px_2px_0_#7c6cff]">
+            <div className="w-12 h-12 rounded-2xl bg-white dark:bg-[#1a1644] border-2 border-[#173c34] dark:border-[#7c6cff] text-[#173c34] dark:text-[#5ce1e6] flex items-center justify-center shadow-[2px_2px_0_#173c34] dark:shadow-[2px_2px_0_#7c6cff] z-10">
               <FiUsers className="w-6 h-6 text-[#173c34] dark:text-[#5ce1e6]" />
             </div>
           </div>
         </div>
 
-        {/* Controls & Search */}
+        {/* ======================================================== */}
+        {/* 3. CONTROLS & SEARCH                                    */}
+        {/* ======================================================== */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-[#1a1644] p-4 rounded-2xl border-2 border-[#173c34] dark:border-[#352f76] shadow-[4px_4px_0_#173c34] dark:shadow-[4px_4px_0_#7c6cff] transition-all">
           <div className="relative w-full sm:w-80">
             <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173c34]/50 dark:text-[#aca8d8]/60" />
@@ -235,32 +284,44 @@ function AdminDashboardContent() {
           </div>
         </div>
 
-        {/* Sessions Grid */}
+        {/* ======================================================== */}
+        {/* 4. SESSIONS GRID / EMPTY STATE with FLOATING CARTOONS   */}
+        {/* ======================================================== */}
         {loading ? (
-          <div className="py-16 bg-white dark:bg-[#1a1644] rounded-[2rem] border-2 border-[#173c34] dark:border-[#352f76] shadow-[6px_6px_0_#173c34] dark:shadow-[6px_6px_0_#7c6cff] flex items-center justify-center">
+          <div className="py-20 bg-white dark:bg-[#1a1644] rounded-[2rem] border-2 border-[#173c34] dark:border-[#352f76] shadow-[6px_6px_0_#173c34] dark:shadow-[6px_6px_0_#7c6cff] flex flex-col items-center justify-center space-y-4">
+            <KawaiiCloud className="w-24 h-16" isDark={isDark} />
             <LoadingSpinner message="Scanning sessions repository..." />
           </div>
         ) : filteredSessions.length === 0 ? (
-          <div className="text-center py-16 px-6 bg-white dark:bg-[#1a1644] rounded-[2rem] border-2 border-[#173c34] dark:border-[#352f76] shadow-[6px_6px_0_#173c34] dark:shadow-[6px_6px_0_#7c6cff] space-y-4">
-            <div className="w-14 h-14 rounded-2xl bg-[#f7f4ec] dark:bg-[#221d57] border-2 border-[#173c34] dark:border-[#7c6cff] text-[#173c34] dark:text-[#5ce1e6] flex items-center justify-center mx-auto shadow-[3px_3px_0_#173c34] dark:shadow-[3px_3px_0_#7c6cff]">
-              <FiLayers className="w-7 h-7" />
+          <div className="text-center py-16 px-6 bg-white dark:bg-[#1a1644] rounded-[2rem] border-2 border-[#173c34] dark:border-[#352f76] shadow-[6px_6px_0_#173c34] dark:shadow-[6px_6px_0_#7c6cff] space-y-6">
+            
+            {/* Playful Floating Caricatures in Empty State */}
+            <div className="flex items-center justify-center gap-6">
+              <KawaiiCloud variant="professor" className="w-28 h-20" isDark={isDark} />
+              <KawaiiServerRack className="w-16 h-22" isDark={isDark} />
             </div>
-            <h3 className="font-display text-xl font-bold text-[#173c34] dark:text-[#f0eeff]">No sessions found</h3>
-            <p className="text-xs sm:text-sm text-[#173c34]/70 dark:text-[#aca8d8] max-w-sm mx-auto">
-              {searchQuery || filterStatus !== 'All'
-                ? 'No quiz sessions matched your search or status filter.'
-                : 'Create your first quiz session to start adding questions and hosting live competitions!'}
-            </p>
+
+            <div className="max-w-md mx-auto space-y-2">
+              <h3 className="font-display text-2xl font-bold text-[#173c34] dark:text-[#f0eeff]">
+                {searchQuery || filterStatus !== 'All' ? 'No matching sessions' : 'Ready to launch your first quiz?'}
+              </h3>
+              <p className="text-xs sm:text-sm text-[#173c34]/70 dark:text-[#aca8d8] leading-relaxed">
+                {searchQuery || filterStatus !== 'All'
+                  ? 'No quiz sessions matched your search or status filter. Try clearing filters.'
+                  : 'Welcome, Quiz Master! Create a quiz session, add questions, set the countdown timer, and watch your students climb the live leaderboard!'}
+              </p>
+            </div>
+
             {!searchQuery && filterStatus === 'All' && (
               <button
                 onClick={() => {
                   setSelectedSessionForEdit(null);
                   setIsFormOpen(true);
                 }}
-                className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-full text-xs font-bold text-white bg-[#e65f45] dark:bg-[#ff6fb5] dark:text-[#0c0a23] border-2 border-[#173c34] dark:border-[#7c6cff] shadow-[0_4px_0_#a83a29] dark:shadow-[0_4px_0_#1a1060] transition-all"
+                className="inline-flex items-center space-x-2 px-7 py-3 rounded-full text-xs font-bold text-white bg-[#e65f45] dark:bg-[#ff6fb5] dark:text-[#0c0a23] border-2 border-[#173c34] dark:border-[#7c6cff] shadow-[0_4px_0_#a83a29] dark:shadow-[0_4px_0_#1a1060] hover:-translate-y-0.5 active:translate-y-0 transition-all"
               >
                 <FiPlus className="w-4 h-4 stroke-[3]" />
-                <span>Create Session</span>
+                <span>Create Your First Session</span>
               </button>
             )}
           </div>
@@ -279,7 +340,7 @@ function AdminDashboardContent() {
               return (
                 <div
                   key={sessionId}
-                  className="bg-white dark:bg-[#1a1644] rounded-[2rem] p-6 border-2 border-[#173c34] dark:border-[#352f76] shadow-[6px_6px_0_#173c34] dark:shadow-[6px_6px_0_#7c6cff] hover:shadow-[10px_10px_0_#173c34] dark:hover:shadow-[10px_10px_0_#7c6cff] transition-all flex flex-col justify-between"
+                  className="group relative bg-white dark:bg-[#1a1644] rounded-[2rem] p-6 border-2 border-[#173c34] dark:border-[#352f76] shadow-[6px_6px_0_#173c34] dark:shadow-[6px_6px_0_#7c6cff] hover:shadow-[10px_10px_0_#173c34] dark:hover:shadow-[10px_10px_0_#7c6cff] transition-all flex flex-col justify-between"
                 >
                   <div className="space-y-4">
                     {/* Card Header */}
@@ -313,9 +374,16 @@ function AdminDashboardContent() {
                     </div>
 
                     <div>
-                      <h3 className="font-display text-xl font-bold text-[#173c34] dark:text-[#f0eeff] line-clamp-1">
-                        {session.title}
-                      </h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-display text-xl font-bold text-[#173c34] dark:text-[#f0eeff] line-clamp-1">
+                          {session.title}
+                        </h3>
+                        {curStatus === 'live' && (
+                          <span className="flex-shrink-0 animate-pulse" title="Live session">
+                            <StarSparkle className="w-4 h-4 text-[#e65f45] dark:text-[#ff6fb5]" />
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-[#173c34]/70 dark:text-[#aca8d8] mt-1 line-clamp-2 leading-relaxed">
                         {session.description || 'No description provided.'}
                       </p>

@@ -2,11 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { createQuizSession, updateQuizSession } from '../lib/supabase';
+import { useTheme } from '../context/ThemeContext';
+import { KawaiiCloud } from './Caricatures';
 import { FiX, FiClock, FiFileText, FiLayers, FiCheck } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const SessionForm = ({ isOpen, onClose, onSuccess, initialData = null }) => {
   const isEdit = Boolean(initialData && (initialData.id || initialData._id));
+  const { isDark } = useTheme();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -74,7 +77,12 @@ const SessionForm = ({ isOpen, onClose, onSuccess, initialData = null }) => {
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-[#0c0a23]/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-[#f7f4ec] dark:bg-[#1a1644] rounded-[2.25rem] max-w-lg w-full p-6 sm:p-8 border-3 border-[#173c34] dark:border-[#7c6cff] shadow-[12px_12px_0_#173c34] dark:shadow-[12px_12px_0_#7c6cff] transition-all animate-in fade-in zoom-in-95 duration-200 text-[#173c34] dark:text-[#f0eeff]">
+      <div className="relative bg-[#f7f4ec] dark:bg-[#1a1644] rounded-[2.25rem] max-w-lg w-full p-6 sm:p-8 border-3 border-[#173c34] dark:border-[#7c6cff] shadow-[12px_12px_0_#173c34] dark:shadow-[12px_12px_0_#7c6cff] transition-all animate-in fade-in zoom-in-95 duration-200 text-[#173c34] dark:text-[#f0eeff]">
+        {/* Floating Cute Professor Cloud peeking on top of modal */}
+        <div className="absolute -top-10 -left-4 pointer-events-none z-20">
+          <KawaiiCloud variant="professor" className="w-20 h-16" isDark={isDark} />
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between pb-5 border-b-2 border-[#173c34]/15 dark:border-[#352f76]">
           <div>

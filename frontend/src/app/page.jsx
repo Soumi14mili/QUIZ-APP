@@ -5,147 +5,15 @@ import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import ThemeToggle from '../components/ThemeToggle';
+import {
+  KawaiiCloud,
+  KawaiiServerRack,
+  KawaiiS3Cup,
+  StarSparkle,
+  SquiggleOrange,
+  SquiggleDark,
+} from '../components/Caricatures';
 import { FiArrowRight, FiShield, FiClock, FiAward } from 'react-icons/fi';
-
-// ==========================================
-// Kawaii Hand-drawn SVG Characters & Doodles
-// (Adaptive to Neo-Pop Light and Dark palettes)
-// ==========================================
-
-function KawaiiCloud({ className = 'w-24 h-16', isDark = false }) {
-  const strokeColor = isDark ? '#7C6CFF' : '#18332C';
-  const sparkleColor = isDark ? '#5CE1E6' : '#F6C453';
-
-  return (
-    <div className={`relative inline-block ${className}`}>
-      <svg viewBox="0 0 120 75" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-sm">
-        {/* Cloud Body */}
-        <path
-          d="M32 64H92C104 64 113 55 113 43C113 32 105 23 94 22C92 10 80 2 66 2C54 2 44 9 40 19C37 18 34 17 31 17C17 17 6 28 6 42C6 54 17 64 32 64Z"
-          fill="#FFFFFF"
-          stroke={strokeColor}
-          strokeWidth="3"
-          strokeLinejoin="round"
-        />
-        {/* Happy Curved Eyes */}
-        <path d="M44 38C44 38 48 33 52 38" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
-        <path d="M68 38C68 38 72 33 76 38" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
-        {/* Little Smile */}
-        <path d="M57 44C57 44 60 48 63 44" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
-        {/* Pink Blush Cheeks */}
-        <ellipse cx="38" cy="42" rx="4.5" ry="2.5" fill="#FFA59E" />
-        <ellipse cx="82" cy="42" rx="4.5" ry="2.5" fill="#FFA59E" />
-      </svg>
-      {/* Little Star Sparkles */}
-      <span className="absolute -top-1 -right-2 text-sm animate-pulse" style={{ color: sparkleColor }}>
-        ✦
-      </span>
-      <span className="absolute top-2 -right-4 text-xs" style={{ color: sparkleColor }}>
-        ★
-      </span>
-    </div>
-  );
-}
-
-function KawaiiServerRack({ className = 'w-14 h-18', isDark = false }) {
-  const strokeColor = isDark ? '#7C6CFF' : '#18332C';
-  const bottomTierColor = isDark ? '#5CE1E6' : '#F6C453';
-
-  return (
-    <svg viewBox="0 0 70 85" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      {/* Top Tier (Mint / Lavender) */}
-      <rect x="6" y="6" width="56" height="18" rx="7" fill={isDark ? '#B9B0FF' : '#99E2C6'} stroke={strokeColor} strokeWidth="2.5" />
-      <line x1="14" y1="15" x2="22" y2="15" stroke={strokeColor} strokeWidth="2" strokeLinecap="round" />
-      {/* Happy face on top rack */}
-      <circle cx="34" cy="14" r="1.5" fill={strokeColor} />
-      <circle cx="44" cy="14" r="1.5" fill={strokeColor} />
-      <path d="M38 17C38 17 39 19 40 17" stroke={strokeColor} strokeWidth="1.5" strokeLinecap="round" />
-      <circle cx="53" cy="15" r="1.5" fill={strokeColor} />
-
-      {/* Middle Tier (Lavender Blue) */}
-      <rect x="6" y="27" width="56" height="18" rx="7" fill="#C3BBF5" stroke={strokeColor} strokeWidth="2.5" />
-      <line x1="14" y1="36" x2="30" y2="36" stroke={strokeColor} strokeWidth="2" strokeLinecap="round" />
-      <circle cx="44" cy="36" r="1.5" fill={strokeColor} />
-      <circle cx="53" cy="36" r="1.5" fill={strokeColor} />
-
-      {/* Bottom Tier (Golden Yellow / Electric Cyan) */}
-      <rect x="6" y="48" width="56" height="18" rx="7" fill={bottomTierColor} stroke={strokeColor} strokeWidth="2.5" />
-      <line x1="14" y1="57" x2="36" y2="57" stroke={strokeColor} strokeWidth="2" strokeLinecap="round" />
-      <circle cx="46" cy="57" r="1.5" fill={strokeColor} />
-      <circle cx="53" cy="57" r="1.5" fill={strokeColor} />
-
-      {/* Cute Stick Feet */}
-      <line x1="20" y1="67" x2="16" y2="76" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="48" y1="67" x2="52" y2="76" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function KawaiiS3Cup({ className = 'w-16 h-20', isDark = false }) {
-  const strokeColor = isDark ? '#7C6CFF' : '#18332C';
-  const textColor = isDark ? '#7C6CFF' : '#18332C';
-
-  return (
-    <svg viewBox="0 0 75 90" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      {/* S3 Cup Body */}
-      <path
-        d="M12 18 L19 72 C19.5 76 23 80 27 80 H47 C51 80 54.5 76 55 72 L62 18 Z"
-        fill="#FFB6AA"
-        stroke={strokeColor}
-        strokeWidth="2.5"
-        strokeLinejoin="round"
-      />
-      {/* Top rim lid */}
-      <ellipse cx="37" cy="18" rx="26" ry="6" fill="#FFA59E" stroke={strokeColor} strokeWidth="2.5" />
-      {/* Cute Face */}
-      <circle cx="31" cy="38" r="1.8" fill={strokeColor} />
-      <circle cx="43" cy="38" r="1.8" fill={strokeColor} />
-      <path d="M35 44C35 44 37 47 39 44" stroke={strokeColor} strokeWidth="1.8" strokeLinecap="round" />
-      <ellipse cx="25" cy="42" rx="2.5" ry="1.5" fill="#E6674E" opacity="0.6" />
-      <ellipse cx="49" cy="42" rx="2.5" ry="1.5" fill="#E6674E" opacity="0.6" />
-      {/* S3 Text */}
-      <text x="37" y="66" textAnchor="middle" fill={textColor} fontFamily="sans-serif" fontSize="11" fontWeight="800">
-        S3
-      </text>
-    </svg>
-  );
-}
-
-function StarSparkle({ className = 'w-6 h-6 text-[#99E2C6]' }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <path d="M12 0L13.8 8.2L22 10L13.8 11.8L12 20L10.2 11.8L2 10L10.2 8.2L12 0Z" />
-    </svg>
-  );
-}
-
-function SquiggleOrange({ isDark = false }) {
-  const strokeColor = isDark ? '#FF6FB5' : '#E6674E';
-  return (
-    <svg width="90" height="14" viewBox="0 0 90 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M2 7C8 2 14 12 20 7C26 2 32 12 38 7C44 2 50 12 56 7C62 2 68 12 74 7C80 2 86 12 88 7"
-        stroke={strokeColor}
-        strokeWidth="2.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function SquiggleDark({ isDark = false }) {
-  const strokeColor = isDark ? '#5CE1E6' : '#1E5246';
-  return (
-    <svg width="120" height="16" viewBox="0 0 120 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M2 8C10 2 18 14 26 8C34 2 42 14 50 8C58 2 66 14 74 8C82 2 90 14 98 8C106 2 114 14 118 8"
-        stroke={strokeColor}
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
 
 // ==========================================
 // Main Landing Page Component

@@ -6,6 +6,12 @@ import { supabase, getSessionQuestions, addQuestion, updateQuestion, deleteQuest
 import ProtectedRoute from '../../../../../components/ProtectedRoute';
 import LoadingSpinner from '../../../../../components/LoadingSpinner';
 import ThemeToggle from '../../../../../components/ThemeToggle';
+import { useTheme } from '../../../../../context/ThemeContext';
+import {
+  KawaiiCloud,
+  KawaiiServerRack,
+  StarSparkle,
+} from '../../../../../components/Caricatures';
 import {
   FiArrowLeft,
   FiPlus,
@@ -21,6 +27,7 @@ function QuestionManagerContent() {
   const params = useParams();
   const sessionId = params?.id;
   const router = useRouter();
+  const { isDark } = useTheme();
 
   const [session, setSession] = useState(null);
   const [questions, setQuestions] = useState([]);
@@ -147,7 +154,8 @@ function QuestionManagerContent() {
   return (
     <div className="min-h-screen bg-[#f5f3ec] dark:bg-[#0c0a23] text-[#18332c] dark:text-[#f0eeff] transition-colors duration-300">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
-        {/* Navigation & Header */}
+        
+        {/* Navigation & Header with Floating Professor Cloud */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <button
@@ -164,32 +172,35 @@ function QuestionManagerContent() {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b-2 border-[#173c34]/15 dark:border-[#352f76]">
-            <div>
-              <div className="flex items-center space-x-3">
-                <h1 className="font-display text-2xl sm:text-4xl font-normal text-[#173c34] dark:text-[#f0eeff] tracking-tight">
-                  {session?.title || 'Session Questions'}
-                </h1>
-                {session?.status && (
-                  <span
-                    className={`text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full border-2 ${
-                      session.status === 'live' || session.status === 'Live'
-                        ? 'bg-[#b5e7d2] text-[#173c34] border-[#173c34] dark:bg-[#5ce1e6] dark:text-[#0c0a23] dark:border-[#7c6cff]'
-                        : 'bg-[#f7b955] text-[#173c34] border-[#173c34] dark:bg-[#f7b955] dark:text-[#0c0a23] dark:border-[#7c6cff]'
-                    }`}
-                  >
-                    {session.status}
-                  </span>
-                )}
+          <div className="relative rounded-[2rem] bg-white dark:bg-[#1a1644] p-6 sm:p-7 border-2 border-[#173c34] dark:border-[#352f76] shadow-[6px_6px_0_#173c34] dark:shadow-[6px_6px_0_#7c6cff] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 overflow-hidden">
+            <div className="flex items-center gap-4 z-10">
+              <KawaiiCloud variant="professor" className="w-20 h-16 sm:w-24 sm:h-18 flex-shrink-0" isDark={isDark} />
+              <div>
+                <div className="flex items-center space-x-3">
+                  <h1 className="font-display text-2xl sm:text-3xl font-normal text-[#173c34] dark:text-[#f0eeff] tracking-tight">
+                    {session?.title || 'Session Questions'}
+                  </h1>
+                  {session?.status && (
+                    <span
+                      className={`text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full border-2 ${
+                        session.status === 'live' || session.status === 'Live'
+                          ? 'bg-[#b5e7d2] text-[#173c34] border-[#173c34] dark:bg-[#5ce1e6] dark:text-[#0c0a23] dark:border-[#7c6cff]'
+                          : 'bg-[#f7b955] text-[#173c34] border-[#173c34] dark:bg-[#f7b955] dark:text-[#0c0a23] dark:border-[#7c6cff]'
+                      }`}
+                    >
+                      {session.status}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs sm:text-sm text-[#173c34]/70 dark:text-[#aca8d8] mt-1.5">
+                  {questions.length} total questions configured for this quiz session
+                </p>
               </div>
-              <p className="text-xs sm:text-sm text-[#173c34]/70 dark:text-[#aca8d8] mt-1.5">
-                {questions.length} total questions configured for this quiz session
-              </p>
             </div>
 
             <button
               onClick={openAddModal}
-              className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider text-white bg-[#e65f45] dark:bg-[#ff6fb5] dark:text-[#0c0a23] hover:-translate-y-0.5 active:translate-y-0 border-2 border-[#173c34] dark:border-[#7c6cff] shadow-[0_4px_0_#a83a29] dark:shadow-[0_4px_0_#1a1060] transition-all flex-shrink-0"
+              className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider text-white bg-[#e65f45] dark:bg-[#ff6fb5] dark:text-[#0c0a23] hover:-translate-y-0.5 active:translate-y-0 border-2 border-[#173c34] dark:border-[#7c6cff] shadow-[0_4px_0_#a83a29] dark:shadow-[0_4px_0_#1a1060] transition-all flex-shrink-0 z-10"
             >
               <FiPlus className="w-4 h-4 stroke-[3]" />
               <span>Add Question</span>
@@ -199,18 +210,22 @@ function QuestionManagerContent() {
 
         {/* Questions list */}
         {loading ? (
-          <div className="py-16 bg-white dark:bg-[#1a1644] rounded-[2rem] border-2 border-[#173c34] dark:border-[#352f76] shadow-[6px_6px_0_#173c34] dark:shadow-[6px_6px_0_#7c6cff] flex items-center justify-center">
+          <div className="py-16 bg-white dark:bg-[#1a1644] rounded-[2rem] border-2 border-[#173c34] dark:border-[#352f76] shadow-[6px_6px_0_#173c34] dark:shadow-[6px_6px_0_#7c6cff] flex flex-col items-center justify-center space-y-4">
+            <KawaiiCloud className="w-20 h-14" isDark={isDark} />
             <LoadingSpinner message="Loading question bank..." />
           </div>
         ) : questions.length === 0 ? (
-          <div className="text-center py-16 px-6 bg-white dark:bg-[#1a1644] rounded-[2rem] border-2 border-[#173c34] dark:border-[#352f76] shadow-[6px_6px_0_#173c34] dark:shadow-[6px_6px_0_#7c6cff] space-y-4">
-            <div className="w-14 h-14 rounded-2xl bg-[#f7f4ec] dark:bg-[#221d57] border-2 border-[#173c34] dark:border-[#7c6cff] text-[#173c34] dark:text-[#5ce1e6] flex items-center justify-center mx-auto shadow-[3px_3px_0_#173c34] dark:shadow-[3px_3px_0_#7c6cff]">
-              <FiHelpCircle className="w-7 h-7" />
+          <div className="text-center py-16 px-6 bg-white dark:bg-[#1a1644] rounded-[2rem] border-2 border-[#173c34] dark:border-[#352f76] shadow-[6px_6px_0_#173c34] dark:shadow-[6px_6px_0_#7c6cff] space-y-6">
+            <div className="flex items-center justify-center gap-5">
+              <KawaiiCloud className="w-24 h-16" isDark={isDark} />
+              <KawaiiServerRack className="w-14 h-18" isDark={isDark} />
             </div>
-            <h3 className="font-display text-xl font-bold text-[#173c34] dark:text-[#f0eeff]">No questions added yet</h3>
-            <p className="text-xs sm:text-sm text-[#173c34]/70 dark:text-[#aca8d8] max-w-sm mx-auto">
-              Build your multiple-choice questions with 4 options and designate the correct answer.
-            </p>
+            <div className="max-w-md mx-auto space-y-2">
+              <h3 className="font-display text-xl sm:text-2xl font-bold text-[#173c34] dark:text-[#f0eeff]">No questions added yet</h3>
+              <p className="text-xs sm:text-sm text-[#173c34]/70 dark:text-[#aca8d8] leading-relaxed">
+                Build your multiple-choice questions with 4 options and designate the correct answer for automated scoring.
+              </p>
+            </div>
             <button
               onClick={openAddModal}
               className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-full text-xs font-bold text-white bg-[#e65f45] dark:bg-[#ff6fb5] dark:text-[#0c0a23] border-2 border-[#173c34] dark:border-[#7c6cff] shadow-[0_4px_0_#a83a29] dark:shadow-[0_4px_0_#1a1060] transition-all"
@@ -305,7 +320,13 @@ function QuestionManagerContent() {
         {/* Add / Edit Question Modal */}
         {isModalOpen && (
           <div className="fixed inset-0 z-50 overflow-y-auto bg-[#0c0a23]/70 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-[#f7f4ec] dark:bg-[#1a1644] rounded-[2.25rem] max-w-xl w-full p-6 sm:p-8 border-3 border-[#173c34] dark:border-[#7c6cff] shadow-[12px_12px_0_#173c34] dark:shadow-[12px_12px_0_#7c6cff] transition-all animate-in fade-in zoom-in-95 text-[#173c34] dark:text-[#f0eeff]">
+            <div className="relative bg-[#f7f4ec] dark:bg-[#1a1644] rounded-[2.25rem] max-w-xl w-full p-6 sm:p-8 border-3 border-[#173c34] dark:border-[#7c6cff] shadow-[12px_12px_0_#173c34] dark:shadow-[12px_12px_0_#7c6cff] transition-all animate-in fade-in zoom-in-95 text-[#173c34] dark:text-[#f0eeff]">
+              
+              {/* Floating caricature on modal */}
+              <div className="absolute -top-10 -left-3 pointer-events-none z-20">
+                <KawaiiCloud variant="professor" className="w-20 h-16" isDark={isDark} />
+              </div>
+
               <div className="flex items-center justify-between pb-4 border-b-2 border-[#173c34]/15 dark:border-[#352f76]">
                 <div>
                   <span className="inline-block px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-[#b5e7d2] dark:bg-[#5ce1e6] text-[#173c34] dark:text-[#0c0a23] border border-[#173c34] dark:border-[#7c6cff] mb-2 shadow-[2px_2px_0_#173c34] dark:shadow-[2px_2px_0_#7c6cff]">

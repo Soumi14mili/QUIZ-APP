@@ -80,3 +80,88 @@ html.dark .bg-dot-pattern-dark {
 .animate-timer-warning {
   animation: softPulse 1s infinite ease-in-out;
 }
+
+/* ======================================================== */
+/* Smooth Floating & Bobbing Animations for Cartoons/Clouds  */
+/* ======================================================== */
+@keyframes floatSlow {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-9px) rotate(2deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+@keyframes floatReverse {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(8px) rotate(-2.5deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+@keyframes floatBob {
+  0% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-7px) scale(1.02);
+  }
+  100% {
+    transform: translateY(0px) scale(1);
+  }
+}
+
+@keyframes floatSway {
+  0% {
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-6px) translateX(4px) rotate(1.5deg);
+  }
+  66% {
+    transform: translateY(4px) translateX(-4px) rotate(-1.5deg);
+  }
+  100% {
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+  }
+}
+
+@keyframes twinkleStar {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3) rotate(20deg);
+    opacity: 0.65;
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 4.5s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: floatReverse 5s ease-in-out infinite;
+}
+
+.animate-float-bob {
+  animation: floatBob 3.5s ease-in-out infinite;
+}
+
+.animate-float-sway {
+  animation: floatSway 6s ease-in-out infinite;
+}
+
+.animate-twinkle {
+  animation: twinkleStar 2.5s ease-in-out infinite;
+}
