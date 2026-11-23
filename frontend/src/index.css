@@ -29,8 +29,20 @@
   background-size: 24px 24px;
 }
 
+.dark .bg-dot-pattern,
+html.dark .bg-dot-pattern {
+  background-image: radial-gradient(rgba(124, 108, 255, 0.22) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+}
+
 .bg-dot-pattern-dark {
   background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+}
+
+.dark .bg-dot-pattern-dark,
+html.dark .bg-dot-pattern-dark {
+  background-image: radial-gradient(rgba(124, 108, 255, 0.25) 1.5px, transparent 1.5px);
   background-size: 24px 24px;
 }
 

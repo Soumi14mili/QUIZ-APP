@@ -1,5 +1,6 @@
 import '../index.css';
 import { AuthProvider } from '../context/AuthContext';
+import { ThemeProvider } from '../context/ThemeContext';
 import Navbar from '../components/Navbar';
 import { Toaster } from 'react-hot-toast';
 
@@ -19,11 +20,12 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body className="bg-[#f7f4ec] text-[#172a25] font-sans antialiased min-h-screen flex flex-col">
-        <AuthProvider>
-          <Navbar />
-          <div className="flex-1 flex flex-col">{children}</div>
-          <Toaster
+      <body className="bg-[#f5f3ec] text-[#18332c] dark:bg-[#0c0a23] dark:text-[#f0eeff] font-sans antialiased min-h-screen flex flex-col transition-colors duration-300">
+        <ThemeProvider>
+          <AuthProvider>
+            <Navbar />
+            <div className="flex-1 flex flex-col">{children}</div>
+            <Toaster
             position="top-right"
             toastOptions={{
               duration: 3500,
@@ -50,7 +52,8 @@ export default function RootLayout({ children }) {
               },
             }}
           />
-        </AuthProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

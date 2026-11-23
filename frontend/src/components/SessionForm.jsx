@@ -73,24 +73,24 @@ const SessionForm = ({ isOpen, onClose, onSuccess, initialData = null }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#173c34]/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-[#f7f4ec] rounded-[2.25rem] max-w-lg w-full p-6 sm:p-8 border-3 border-[#173c34] shadow-[12px_12px_0_#173c34] transition-all animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#0c0a23]/70 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-[#f7f4ec] dark:bg-[#1a1644] rounded-[2.25rem] max-w-lg w-full p-6 sm:p-8 border-3 border-[#173c34] dark:border-[#7c6cff] shadow-[12px_12px_0_#173c34] dark:shadow-[12px_12px_0_#7c6cff] transition-all animate-in fade-in zoom-in-95 duration-200 text-[#173c34] dark:text-[#f0eeff]">
         {/* Header */}
-        <div className="flex items-center justify-between pb-5 border-b-2 border-[#173c34]/15">
+        <div className="flex items-center justify-between pb-5 border-b-2 border-[#173c34]/15 dark:border-[#352f76]">
           <div>
-            <span className="inline-block px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-[#b5e7d2] text-[#173c34] border border-[#173c34] mb-2">
+            <span className="inline-block px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-[#b5e7d2] dark:bg-[#5ce1e6] text-[#173c34] dark:text-[#0c0a23] border border-[#173c34] dark:border-[#7c6cff] mb-2 shadow-[2px_2px_0_#173c34] dark:shadow-[2px_2px_0_#7c6cff]">
               Instructor Session
             </span>
-            <h3 className="font-display text-2xl font-bold text-[#173c34]">
+            <h3 className="font-display text-2xl font-bold text-[#173c34] dark:text-[#f0eeff]">
               {isEdit ? 'Edit Quiz Session' : 'Create New Session'}
             </h3>
-            <p className="text-xs text-[#173c34]/70 mt-1">
+            <p className="text-xs text-[#173c34]/70 dark:text-[#aca8d8] mt-1">
               {isEdit ? 'Update session parameters and visibility' : 'Configure details for the upcoming quiz'}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-full border-2 border-[#173c34] bg-white text-[#173c34] hover:bg-[#ffb6aa] flex items-center justify-center transition-all shadow-[2px_2px_0_#173c34]"
+            className="w-10 h-10 rounded-full border-2 border-[#173c34] dark:border-[#7c6cff] bg-white dark:bg-[#221d57] text-[#173c34] dark:text-[#f0eeff] hover:bg-[#ffb6aa] dark:hover:bg-[#ff6fb5]/20 flex items-center justify-center transition-all shadow-[2px_2px_0_#173c34] dark:shadow-[2px_2px_0_#7c6cff]"
           >
             <FiX className="w-5 h-5" />
           </button>
@@ -99,7 +99,7 @@ const SessionForm = ({ isOpen, onClose, onSuccess, initialData = null }) => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-[#173c34] mb-2" htmlFor="title">
+            <label className="block text-xs font-black uppercase tracking-wider text-[#173c34] dark:text-[#aca8d8] mb-2" htmlFor="title">
               Session Title *
             </label>
             <input
@@ -109,12 +109,12 @@ const SessionForm = ({ isOpen, onClose, onSuccess, initialData = null }) => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. AWS Solutions Architect Associate Quiz"
-              className="w-full px-4 py-3 rounded-xl border-2 border-[#173c34] bg-white text-[#173c34] font-medium placeholder-[#173c34]/40 focus:outline-none focus:shadow-[4px_4px_0_#173c34] transition-all"
+              className="w-full px-4 py-3 rounded-xl border-2 border-[#173c34] dark:border-[#7c6cff] bg-white dark:bg-[#221d57] text-[#173c34] dark:text-[#f0eeff] font-medium placeholder-[#173c34]/40 dark:placeholder-[#aca8d8]/50 focus:outline-none focus:shadow-[4px_4px_0_#173c34] dark:focus:shadow-[4px_4px_0_#7c6cff] transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-[#173c34] mb-2" htmlFor="description">
+            <label className="block text-xs font-black uppercase tracking-wider text-[#173c34] dark:text-[#aca8d8] mb-2" htmlFor="description">
               Description
             </label>
             <textarea
@@ -123,12 +123,12 @@ const SessionForm = ({ isOpen, onClose, onSuccess, initialData = null }) => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Brief overview of topics covered, difficulty level, rules..."
-              className="w-full px-4 py-3 rounded-xl border-2 border-[#173c34] bg-white text-[#173c34] font-medium placeholder-[#173c34]/40 focus:outline-none focus:shadow-[4px_4px_0_#173c34] transition-all resize-none"
+              className="w-full px-4 py-3 rounded-xl border-2 border-[#173c34] dark:border-[#7c6cff] bg-white dark:bg-[#221d57] text-[#173c34] dark:text-[#f0eeff] font-medium placeholder-[#173c34]/40 dark:placeholder-[#aca8d8]/50 focus:outline-none focus:shadow-[4px_4px_0_#173c34] dark:focus:shadow-[4px_4px_0_#7c6cff] transition-all resize-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-[#173c34] mb-2" htmlFor="duration">
+            <label className="block text-xs font-black uppercase tracking-wider text-[#173c34] dark:text-[#aca8d8] mb-2" htmlFor="duration">
               Duration (Minutes) *
             </label>
             <div className="relative">
@@ -140,23 +140,23 @@ const SessionForm = ({ isOpen, onClose, onSuccess, initialData = null }) => {
                 required
                 value={durationMinutes}
                 onChange={(e) => setDurationMinutes(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-[#173c34] bg-white text-[#173c34] font-bold focus:outline-none focus:shadow-[4px_4px_0_#173c34] transition-all"
+                className="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-[#173c34] dark:border-[#7c6cff] bg-white dark:bg-[#221d57] text-[#173c34] dark:text-[#f0eeff] font-bold focus:outline-none focus:shadow-[4px_4px_0_#173c34] dark:focus:shadow-[4px_4px_0_#7c6cff] transition-all"
               />
-              <FiClock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173c34]/60" />
+              <FiClock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#173c34]/60 dark:text-[#aca8d8]" />
             </div>
-            <p className="text-[11px] text-[#173c34]/60 mt-1">Timer starts counting down once a student begins.</p>
+            <p className="text-[11px] text-[#173c34]/60 dark:text-[#aca8d8]/70 mt-1">Timer starts counting down once a student begins.</p>
           </div>
 
           {isEdit && (
             <div>
-              <label className="block text-xs font-black uppercase tracking-wider text-[#173c34] mb-2" htmlFor="status">
+              <label className="block text-xs font-black uppercase tracking-wider text-[#173c34] dark:text-[#aca8d8] mb-2" htmlFor="status">
                 Session Status
               </label>
               <select
                 id="status"
                 value={status.toLowerCase()}
                 onChange={(e) => setStatus(e.target.value.toLowerCase())}
-                className="w-full px-4 py-3 rounded-xl border-2 border-[#173c34] bg-white text-[#173c34] font-bold focus:outline-none focus:shadow-[4px_4px_0_#173c34] transition-all"
+                className="w-full px-4 py-3 rounded-xl border-2 border-[#173c34] dark:border-[#7c6cff] bg-white dark:bg-[#221d57] text-[#173c34] dark:text-[#f0eeff] font-bold focus:outline-none focus:shadow-[4px_4px_0_#173c34] dark:focus:shadow-[4px_4px_0_#7c6cff] transition-all cursor-pointer"
               >
                 <option value="draft">Draft (Only Admin can see & edit)</option>
                 <option value="live">Live (Open for student joins)</option>
@@ -166,25 +166,25 @@ const SessionForm = ({ isOpen, onClose, onSuccess, initialData = null }) => {
           )}
 
           {/* Action buttons */}
-          <div className="flex items-center justify-end space-x-3 pt-4 border-t-2 border-[#173c34]/15">
+          <div className="flex items-center justify-end space-x-3 pt-4 border-t-2 border-[#173c34]/15 dark:border-[#352f76]">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-5 py-2.5 rounded-full border-2 border-[#173c34] bg-white text-[#173c34] font-bold text-sm hover:bg-[#eef3f0] transition-all"
+              className="px-5 py-2.5 rounded-full border-2 border-[#173c34] dark:border-[#7c6cff] bg-white dark:bg-[#221d57] text-[#173c34] dark:text-[#f0eeff] font-bold text-sm hover:bg-[#eef3f0] dark:hover:bg-[#29246b] transition-all"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-full bg-[#e65f45] text-white font-bold text-sm border-2 border-[#173c34] shadow-[0_4px_0_#a83a29] hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-50"
+              className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-full bg-[#e65f45] dark:bg-[#ff6fb5] text-white dark:text-[#0c0a23] font-bold text-sm border-2 border-[#173c34] dark:border-[#7c6cff] shadow-[0_4px_0_#a83a29] dark:shadow-[0_4px_0_#1a1060] hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-50"
             >
               {loading ? (
                 <span>Saving...</span>
               ) : (
                 <>
-                  <FiCheck className="w-4 h-4" />
+                  <FiCheck className="w-4 h-4 stroke-[3]" />
                   <span>{isEdit ? 'Update Session' : 'Create Session'}</span>
                 </>
               )}
