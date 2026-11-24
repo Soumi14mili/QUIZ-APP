@@ -14,6 +14,8 @@ import {
 } from '../../../../../components/Caricatures';
 import {
   FiArrowLeft,
+  FiArrowUp,
+  FiArrowDown,
   FiPlus,
   FiEdit,
   FiTrash2,
@@ -142,6 +144,35 @@ function QuestionManagerContent() {
     } catch (err) {
       console.error('Delete error:', err);
       toast.error('Failed to delete question');
+    }
+  };
+
+  const handleMoveQuestion = async (idx, direction) => {
+    const newQuestions = [...questions];
+    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= newQuestions.length) return;
+
+    const qA = newQuestions[idx];
+    const qB = newQuestions[targetIdx];
+    const orderA = qA.sort_order ?? idx;
+    const orderB = qB.sort_order ?? targetIdx;
+
+    try {
+      // Swap sort_order in DB
+      await Promise.all([
+        updateQuestion(qA.id || qA._id, { sort_order: orderB }),
+        updateQuestion(qB.id || qB._id, { sort_order: orderA }),
+      ]);
+
+      // Swap locally and re-sort
+      newQuestions[idx] = { ...qA, sort_order: orderB };
+      newQuestions[targetIdx] = { ...qB, sort_order: orderA };
+      newQuestions.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+      setQuestions(newQuestions);
+      toast.success('Question order updated');
+    } catch (err) {
+      console.error('Reorder error:', err);
+      toast.error('Failed to reorder question');
     }
   };
 
@@ -418,6 +449,24 @@ function QuestionManagerContent() {
                     </div>
 
                     <div className="flex items-center space-x-2 flex-shrink-0">
+                      {/* Move Up */}
+                      <button
+                        onClick={() => handleMoveQuestion(idx, 'up')}
+                        disabled={idx === 0}
+                        className="w-9 h-9 rounded-full border-2 border-[#173c34] dark:border-[#7c6cff] bg-white dark:bg-[#221d57] text-[#173c34] dark:text-[#f0eeff] hover:bg-[#f7b955] dark:hover:bg-[#29246b] shadow-[2px_2px_0_#173c34] dark:shadow-[2px_2px_0_#7c6cff] flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Move question up"
+                      >
+                        <FiArrowUp className="w-3.5 h-3.5" />
+                      </button>
+                      {/* Move Down */}
+                      <button
+                        onClick={() => handleMoveQuestion(idx, 'down')}
+                        disabled={idx === questions.length - 1}
+                        className="w-9 h-9 rounded-full border-2 border-[#173c34] dark:border-[#7c6cff] bg-white dark:bg-[#221d57] text-[#173c34] dark:text-[#f0eeff] hover:bg-[#f7b955] dark:hover:bg-[#29246b] shadow-[2px_2px_0_#173c34] dark:shadow-[2px_2px_0_#7c6cff] flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Move question down"
+                      >
+                        <FiArrowDown className="w-3.5 h-3.5" />
+                      </button>
                       <button
                         onClick={() => openEditModal(q)}
                         className="w-9 h-9 rounded-full border-2 border-[#173c34] dark:border-[#7c6cff] bg-white dark:bg-[#221d57] text-[#173c34] dark:text-[#f0eeff] hover:bg-[#eef3f0] dark:hover:bg-[#29246b] shadow-[2px_2px_0_#173c34] dark:shadow-[2px_2px_0_#7c6cff] flex items-center justify-center transition-all"
