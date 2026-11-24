@@ -392,8 +392,16 @@ function AdminDashboardContent() {
                     {/* Metadata pill counters */}
                     <div className="grid grid-cols-3 gap-2 pt-3 border-t border-[#173c34]/10 dark:border-[#352f76] text-xs text-[#173c34] dark:text-[#f0eeff]">
                       <div className="flex flex-col items-center bg-[#fdfbf7] dark:bg-[#221d57] p-2 rounded-xl border border-[#173c34]/15 dark:border-[#7c6cff]/30">
-                        <span className="text-[10px] uppercase font-bold text-[#173c34]/60 dark:text-[#aca8d8]">Duration</span>
-                        <span className="font-display font-bold text-sm text-[#173c34] dark:text-[#5ce1e6] mt-0.5">{session.duration_minutes}m</span>
+                        <span className="text-[10px] uppercase font-bold text-[#173c34]/60 dark:text-[#aca8d8]">
+                          {session.timer_mode === 'question' ? 'Per-Q Timer' : 'Duration'}
+                        </span>
+                        <span className="font-display font-bold text-sm text-[#173c34] dark:text-[#5ce1e6] mt-0.5" title={session.timer_mode === 'question' ? `${session.duration_seconds || 30} seconds per question` : `${session.duration_seconds || session.duration_minutes * 60} seconds total`}>
+                          {session.timer_mode === 'question'
+                            ? `${session.duration_seconds || 30}s / Q`
+                            : (session.duration_seconds && session.duration_seconds < 60
+                                ? `${session.duration_seconds}s`
+                                : `${session.duration_minutes || Math.ceil((session.duration_seconds || 900) / 60)}m`)}
+                        </span>
                       </div>
                       <div className="flex flex-col items-center bg-[#fdfbf7] dark:bg-[#221d57] p-2 rounded-xl border border-[#173c34]/15 dark:border-[#7c6cff]/30">
                         <span className="text-[10px] uppercase font-bold text-[#173c34]/60 dark:text-[#aca8d8]">Questions</span>

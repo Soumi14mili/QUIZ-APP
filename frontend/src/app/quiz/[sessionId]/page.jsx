@@ -16,6 +16,7 @@ import {
   FiX,
   FiHelpCircle,
   FiZap,
+  FiClock,
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
@@ -173,16 +174,37 @@ function QuizPlayContent() {
     }
   }, [attempt, questions, answers, sessionId, router, isSubmitting]);
 
+  const timerMode = session?.timer_mode || 'quiz';
+
   const handleTimeUp = useCallback(() => {
-    if (!hasAutoSubmittedRef.current) {
-      hasAutoSubmittedRef.current = true;
-      toast('Time is up! Submitting your quiz now...', {
-        icon: '⏰',
-        duration: 4000,
-      });
-      submitQuiz();
+    if (timerMode === 'question') {
+      if (currentIndex < questions.length - 1) {
+        toast(`⏰ Time is up for Question ${currentIndex + 1}! Moving to next...`, {
+          icon: '⚡',
+          duration: 3000,
+        });
+        setCurrentIndex((prev) => prev + 1);
+      } else {
+        if (!hasAutoSubmittedRef.current) {
+          hasAutoSubmittedRef.current = true;
+          toast('⏰ Time is up for final question! Submitting quiz...', {
+            icon: '🏁',
+            duration: 4000,
+          });
+          submitQuiz();
+        }
+      }
+    } else {
+      if (!hasAutoSubmittedRef.current) {
+        hasAutoSubmittedRef.current = true;
+        toast('⏰ Total quiz time is up! Submitting your answers now...', {
+          icon: '⏰',
+          duration: 4000,
+        });
+        submitQuiz();
+      }
     }
-  }, [submitQuiz]);
+  }, [timerMode, currentIndex, questions.length, submitQuiz]);
 
   if (loading) {
     return <LoadingSpinner fullScreen message="Loading quiz arena..." />;
@@ -214,7 +236,8 @@ function QuizPlayContent() {
   const unansweredCount = questions.length - answeredCount;
   const progressPercent = Math.round((answeredCount / questions.length) * 100);
 
-  const durationMs = (session?.duration_minutes || 15) * 60 * 1000;
+  const currentQTimeLimit = currentQ?.time_limit_seconds || session?.duration_seconds || 30;
+  const wholeQuizSeconds = session?.duration_seconds || (session?.duration_minutes ? session.duration_minutes * 60 : 900);
   const startedAt = attempt?.started_at || attempt?.created_at || new Date().toISOString();
 
   return (
@@ -227,9 +250,22 @@ function QuizPlayContent() {
               Q
             </div>
             <div>
-              <h1 className="font-display text-base sm:text-lg font-bold text-[#173c34] line-clamp-1">
-                {session?.title || 'Live Quiz'}
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="font-display text-base sm:text-lg font-bold text-[#173c34] line-clamp-1">
+                  {session?.title || 'Live Quiz'}
+                </h1>
+                {timerMode === 'question' ? (
+                  <span className="hidden sm:inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#f7b955] text-[#173c34] border border-[#173c34]">
+                    <FiZap className="w-3 h-3 text-[#173c34]" />
+                    <span>Per-Question ({currentQTimeLimit}s)</span>
+                  </span>
+                ) : (
+                  <span className="hidden sm:inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#b5e7d2] text-[#173c34] border border-[#173c34]">
+                    <FiClock className="w-3 h-3 text-[#173c34]" />
+                    <span>Whole Quiz Timer</span>
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-[#173c34]/70 hidden sm:block">
                 Answered <span className="font-bold text-[#173c34]">{answeredCount}</span> of {questions.length} questions ({progressPercent}%)
               </p>
@@ -237,7 +273,13 @@ function QuizPlayContent() {
           </div>
 
           <div className="flex items-center space-x-3">
-            <Timer durationMs={durationMs} startedAt={startedAt} onTimeUp={handleTimeUp} />
+            <Timer
+              mode={timerMode}
+              durationSeconds={timerMode === 'question' ? currentQTimeLimit : wholeQuizSeconds}
+              startedAt={startedAt}
+              resetKey={timerMode === 'question' ? currentIndex : 'quiz'}
+              onTimeUp={handleTimeUp}
+            />
 
             <button
               onClick={() => setShowConfirmModal(true)}
@@ -270,6 +312,8 @@ function QuizPlayContent() {
             selectedOption={currentSelectedOption}
             onSelect={handleSelectOption}
             questionNumber={currentIndex + 1}
+            timerMode={timerMode}
+            timeLimitSeconds={currentQTimeLimit}
           />
 
           {/* Previous / Next Controls */}

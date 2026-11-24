@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { supabase, getSessionQuestions, addQuestion, updateQuestion, deleteQuestion } from '../../../../../lib/supabase';
+import { supabase, getSessionQuestions, addQuestion, updateQuestion, deleteQuestion, updateQuizSession } from '../../../../../lib/supabase';
 import ProtectedRoute from '../../../../../components/ProtectedRoute';
 import LoadingSpinner from '../../../../../components/LoadingSpinner';
 import ThemeToggle from '../../../../../components/ThemeToggle';
@@ -20,6 +20,9 @@ import {
   FiCheck,
   FiX,
   FiHelpCircle,
+  FiClock,
+  FiZap,
+  FiLayers,
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
@@ -46,6 +49,24 @@ function QuestionManagerContent() {
   const [optionD, setOptionD] = useState('');
   const [correctOption, setCorrectOption] = useState('A');
 
+  // Timing mode options inside question builder: 'quiz' | 'question'
+  const [timingChoice, setTimingChoice] = useState('quiz');
+  const [questionDurationSeconds, setQuestionDurationSeconds] = useState(30);
+  const [wholeQuizDurationSeconds, setWholeQuizDurationSeconds] = useState(900);
+
+  // Inline session timing update state
+  const [updatingSessionTiming, setUpdatingSessionTiming] = useState(false);
+
+  const formatSecondsHelper = (totalSec) => {
+    const s = parseInt(totalSec, 10);
+    if (isNaN(s) || s <= 0) return '0 seconds';
+    if (s < 60) return `${s} second${s > 1 ? 's' : ''}`;
+    const m = Math.floor(s / 60);
+    const rem = s % 60;
+    if (rem === 0) return `${m} min${m > 1 ? 's' : ''} (${s}s)`;
+    return `${m}m ${rem}s (${s}s)`;
+  };
+
   const fetchSessionAndQuestions = async () => {
     if (!sessionId) return;
     try {
@@ -56,7 +77,16 @@ function QuestionManagerContent() {
       ]);
 
       if (sErr) throw sErr;
-      setSession(sessionData);
+
+      const durSec = sessionData?.duration_seconds || (sessionData?.duration_minutes ? sessionData.duration_minutes * 60 : 900);
+      const enrichedSession = {
+        ...sessionData,
+        duration_seconds: durSec,
+        timer_mode: sessionData?.timer_mode || 'quiz',
+      };
+
+      setSession(enrichedSession);
+      setWholeQuizDurationSeconds(durSec);
       setQuestions(qList || []);
     } catch (err) {
       console.error('Failed to load questions:', err);
@@ -78,6 +108,12 @@ function QuestionManagerContent() {
     setOptionC('');
     setOptionD('');
     setCorrectOption('A');
+
+    // Inherit from session mode or default
+    const mode = session?.timer_mode || 'quiz';
+    setTimingChoice(mode);
+    setQuestionDurationSeconds(mode === 'question' ? (session?.duration_seconds || 30) : 30);
+    setWholeQuizDurationSeconds(session?.duration_seconds || 900);
     setIsModalOpen(true);
   };
 
@@ -89,6 +125,11 @@ function QuestionManagerContent() {
     setOptionC(q.option_c || '');
     setOptionD(q.option_d || '');
     setCorrectOption(q.correct_option || 'A');
+
+    const mode = session?.timer_mode || 'quiz';
+    setTimingChoice(mode);
+    setQuestionDurationSeconds(q.time_limit_seconds || 30);
+    setWholeQuizDurationSeconds(session?.duration_seconds || 900);
     setIsModalOpen(true);
   };
 
@@ -104,6 +145,32 @@ function QuestionManagerContent() {
     }
   };
 
+  // Toggle or update the session-level timing mode
+  const handleToggleSessionMode = async (newMode) => {
+    if (!sessionId) return;
+    try {
+      setUpdatingSessionTiming(true);
+      const defaultSecs = newMode === 'question' ? 30 : 900;
+      await updateQuizSession(sessionId, {
+        timer_mode: newMode,
+        duration_seconds: defaultSecs,
+      });
+
+      setSession((prev) => ({
+        ...prev,
+        timer_mode: newMode,
+        duration_seconds: defaultSecs,
+      }));
+      setWholeQuizDurationSeconds(defaultSecs);
+      toast.success(`Session timing set to ${newMode === 'question' ? 'Each Question' : 'Whole Quiz'}`);
+    } catch (err) {
+      console.error('Failed to update session mode:', err);
+      toast.error('Failed to update session timing mode');
+    } finally {
+      setUpdatingSessionTiming(false);
+    }
+  };
+
   const handleSubmitQuestion = async (e) => {
     e.preventDefault();
 
@@ -116,6 +183,12 @@ function QuestionManagerContent() {
       return;
     }
 
+    const qSecs = parseInt(questionDurationSeconds, 10);
+    if (timingChoice === 'question' && (isNaN(qSecs) || qSecs <= 0)) {
+      toast.error('Question duration must be a positive number of seconds');
+      return;
+    }
+
     const payload = {
       session_id: sessionId,
       question_text: questionText.trim(),
@@ -124,10 +197,26 @@ function QuestionManagerContent() {
       option_c: optionC.trim(),
       option_d: optionD.trim(),
       correct_option: correctOption,
+      time_limit_seconds: qSecs || 30,
     };
 
     try {
       setFormLoading(true);
+
+      // If user toggled timing choice in modal different from session, sync session
+      if (timingChoice !== session?.timer_mode) {
+        const syncSecs = timingChoice === 'quiz' ? wholeQuizDurationSeconds : qSecs;
+        await updateQuizSession(sessionId, {
+          timer_mode: timingChoice,
+          duration_seconds: syncSecs,
+        });
+        setSession((prev) => ({
+          ...prev,
+          timer_mode: timingChoice,
+          duration_seconds: syncSecs,
+        }));
+      }
+
       if (editingQuestion) {
         const qId = editingQuestion.id || editingQuestion._id;
         const updated = await updateQuestion(qId, payload);
@@ -150,6 +239,9 @@ function QuestionManagerContent() {
       setFormLoading(false);
     }
   };
+
+  const questionPresets = [15, 30, 45, 60, 90, 120];
+  const quizPresets = [60, 120, 300, 600, 900, 1800];
 
   return (
     <div className="min-h-screen bg-[#f5f3ec] dark:bg-[#0c0a23] text-[#18332c] dark:text-[#f0eeff] transition-colors duration-300">
@@ -208,6 +300,52 @@ function QuestionManagerContent() {
           </div>
         </div>
 
+        {/* ======================================================== */}
+        {/* TIMING CONFIGURATION BANNER                              */}
+        {/* ======================================================== */}
+        <div className="p-5 rounded-[2rem] bg-white dark:bg-[#1a1644] border-2 border-[#173c34] dark:border-[#7c6cff] shadow-[6px_6px_0_#173c34] dark:shadow-[6px_6px_0_#7c6cff] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-center space-x-3.5">
+            <div className={`w-11 h-11 rounded-2xl flex items-center justify-center border-2 border-[#173c34] dark:border-[#7c6cff] shadow-[2px_2px_0_#173c34] ${
+              session?.timer_mode === 'question'
+                ? 'bg-[#f7b955] text-[#173c34] dark:bg-[#ff6fb5] dark:text-[#0c0a23]'
+                : 'bg-[#b5e7d2] text-[#173c34] dark:bg-[#5ce1e6] dark:text-[#0c0a23]'
+            }`}>
+              {session?.timer_mode === 'question' ? (
+                <FiZap className="w-5 h-5 stroke-[2.5]" />
+              ) : (
+                <FiClock className="w-5 h-5 stroke-[2.5]" />
+              )}
+            </div>
+
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#173c34]/60 dark:text-[#aca8d8]">
+                  Current Session Timing Mode
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#173c34] dark:bg-[#5ce1e6] text-white dark:text-[#0c0a23]">
+                  {session?.timer_mode === 'question' ? 'Each Question Timer' : 'Whole Quiz Timer'}
+                </span>
+              </div>
+              <p className="text-sm font-bold text-[#173c34] dark:text-[#f0eeff] mt-0.5">
+                {session?.timer_mode === 'question'
+                  ? `Each question counts down in seconds (default: ${session?.duration_seconds || 30}s)`
+                  : `Total quiz countdown: ${session?.duration_seconds || 900} seconds (${formatSecondsHelper(session?.duration_seconds || 900)})`}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <button
+              type="button"
+              disabled={updatingSessionTiming}
+              onClick={() => handleToggleSessionMode(session?.timer_mode === 'question' ? 'quiz' : 'question')}
+              className="flex-1 md:flex-initial inline-flex items-center justify-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-bold border-2 border-[#173c34] dark:border-[#7c6cff] bg-[#f7f4ec] dark:bg-[#221d57] text-[#173c34] dark:text-[#f0eeff] hover:bg-[#ffb6aa]/30 dark:hover:bg-[#ff6fb5]/20 shadow-[2px_2px_0_#173c34] dark:shadow-[2px_2px_0_#7c6cff] transition-all"
+            >
+              <span>Switch to {session?.timer_mode === 'question' ? 'Whole Quiz' : 'Each Question'} Mode</span>
+            </button>
+          </div>
+        </div>
+
         {/* Questions list */}
         {loading ? (
           <div className="py-16 bg-white dark:bg-[#1a1644] rounded-[2rem] border-2 border-[#173c34] dark:border-[#352f76] shadow-[6px_6px_0_#173c34] dark:shadow-[6px_6px_0_#7c6cff] flex flex-col items-center justify-center space-y-4">
@@ -223,7 +361,7 @@ function QuestionManagerContent() {
             <div className="max-w-md mx-auto space-y-2">
               <h3 className="font-display text-xl sm:text-2xl font-bold text-[#173c34] dark:text-[#f0eeff]">No questions added yet</h3>
               <p className="text-xs sm:text-sm text-[#173c34]/70 dark:text-[#aca8d8] leading-relaxed">
-                Build your multiple-choice questions with 4 options and designate the correct answer for automated scoring.
+                Build your multiple-choice questions with 4 options, designated correct answer, and custom timing options in seconds.
               </p>
             </div>
             <button
@@ -245,6 +383,8 @@ function QuestionManagerContent() {
                 { key: 'D', text: q.option_d },
               ];
 
+              const qSeconds = q.time_limit_seconds || 30;
+
               return (
                 <div
                   key={qId || idx}
@@ -255,9 +395,26 @@ function QuestionManagerContent() {
                       <span className="w-8 h-8 rounded-xl bg-[#f7b955] dark:bg-[#5ce1e6] border-2 border-[#173c34] dark:border-[#7c6cff] text-[#173c34] dark:text-[#0c0a23] text-xs font-black font-display flex items-center justify-center flex-shrink-0 mt-0.5 shadow-[1px_1px_0_#173c34] dark:shadow-[1px_1px_0_#7c6cff]">
                         {idx + 1}
                       </span>
-                      <h3 className="font-display text-base sm:text-lg font-normal text-[#173c34] dark:text-[#f0eeff] leading-relaxed">
-                        {q.question_text}
-                      </h3>
+                      <div className="space-y-1.5">
+                        <h3 className="font-display text-base sm:text-lg font-normal text-[#173c34] dark:text-[#f0eeff] leading-relaxed">
+                          {q.question_text}
+                        </h3>
+
+                        {/* Timing badge on question card */}
+                        <div className="flex items-center gap-2">
+                          {session?.timer_mode === 'question' ? (
+                            <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#f7b955]/30 dark:bg-[#f7b955]/20 text-[#173c34] dark:text-[#f7b955] border border-[#f7b955]">
+                              <FiZap className="w-3 h-3" />
+                              <span>{qSeconds}s question timer</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#b5e7d2]/40 dark:bg-[#5ce1e6]/20 text-[#173c34] dark:text-[#5ce1e6] border border-[#236653] dark:border-[#5ce1e6]">
+                              <FiClock className="w-3 h-3" />
+                              <span>Whole Quiz Timer ({session?.duration_seconds || 900}s)</span>
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
 
                     <div className="flex items-center space-x-2 flex-shrink-0">
@@ -317,7 +474,7 @@ function QuestionManagerContent() {
           </div>
         )}
 
-        {/* Add / Edit Question Modal */}
+        {/* Add / Edit Question Modal with Timing Mode Options */}
         {isModalOpen && (
           <div className="fixed inset-0 z-50 overflow-y-auto bg-[#0c0a23]/70 backdrop-blur-sm flex items-center justify-center p-4">
             <div className="relative bg-[#f7f4ec] dark:bg-[#1a1644] rounded-[2.25rem] max-w-xl w-full p-6 sm:p-8 border-3 border-[#173c34] dark:border-[#7c6cff] shadow-[12px_12px_0_#173c34] dark:shadow-[12px_12px_0_#7c6cff] transition-all animate-in fade-in zoom-in-95 text-[#173c34] dark:text-[#f0eeff]">
@@ -355,7 +512,7 @@ function QuestionManagerContent() {
                     required
                     value={questionText}
                     onChange={(e) => setQuestionText(e.target.value)}
-                    placeholder="Enter the scenario or architecture question prompt here..."
+                    placeholder="Enter the question prompt here..."
                     className="w-full px-4 py-3 rounded-xl border-2 border-[#173c34] dark:border-[#7c6cff] bg-white dark:bg-[#221d57] text-[#173c34] dark:text-[#f0eeff] font-medium placeholder-[#173c34]/40 dark:placeholder-[#aca8d8]/50 focus:outline-none focus:shadow-[4px_4px_0_#173c34] dark:focus:shadow-[4px_4px_0_#7c6cff] transition-all resize-none text-sm"
                   />
                 </div>
@@ -409,6 +566,144 @@ function QuestionManagerContent() {
                       />
                     </div>
                   ))}
+                </div>
+
+                {/* ======================================================== */}
+                {/* TIMING OPTIONS: WHOLE QUIZ vs EACH QUESTION             */}
+                {/* ======================================================== */}
+                <div className="pt-3 border-t-2 border-[#173c34]/15 dark:border-[#352f76] space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-black uppercase tracking-wider text-[#173c34] dark:text-[#aca8d8]">
+                      Question Timing Mode *
+                    </label>
+                    <span className="text-xs font-bold font-mono text-[#e65f45] dark:text-[#ff6fb5]">
+                      {timingChoice === 'question'
+                        ? formatSecondsHelper(questionDurationSeconds)
+                        : formatSecondsHelper(wholeQuizDurationSeconds)}
+                    </span>
+                  </div>
+
+                  {/* 2 Options for timing */}
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setTimingChoice('quiz')}
+                      className={`p-3 rounded-xl border-2 text-left transition-all ${
+                        timingChoice === 'quiz'
+                          ? 'border-[#173c34] dark:border-[#5ce1e6] bg-[#b5e7d2] dark:bg-[#29246b] text-[#173c34] dark:text-[#5ce1e6] font-black shadow-[3px_3px_0_#173c34] dark:shadow-[3px_3px_0_#5ce1e6]'
+                          : 'border-[#173c34]/20 dark:border-[#352f76] bg-[#fdfbf7] dark:bg-[#1a1644] text-[#173c34]/70 dark:text-[#aca8d8] hover:border-[#173c34]'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-1.5 mb-1">
+                        <FiClock className="w-3.5 h-3.5" />
+                        <span className="text-xs font-black">Whole Quiz Timer</span>
+                      </div>
+                      <p className="text-[10px] leading-tight opacity-80 font-normal">
+                        Spans entire quiz session ({wholeQuizDurationSeconds}s total).
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setTimingChoice('question')}
+                      className={`p-3 rounded-xl border-2 text-left transition-all ${
+                        timingChoice === 'question'
+                          ? 'border-[#173c34] dark:border-[#5ce1e6] bg-[#f7b955] dark:bg-[#29246b] text-[#173c34] dark:text-[#5ce1e6] font-black shadow-[3px_3px_0_#173c34] dark:shadow-[3px_3px_0_#5ce1e6]'
+                          : 'border-[#173c34]/20 dark:border-[#352f76] bg-[#fdfbf7] dark:bg-[#1a1644] text-[#173c34]/70 dark:text-[#aca8d8] hover:border-[#173c34]'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-1.5 mb-1">
+                        <FiZap className="w-3.5 h-3.5" />
+                        <span className="text-xs font-black">Each Question Timer</span>
+                      </div>
+                      <p className="text-[10px] leading-tight opacity-80 font-normal">
+                        Independent timer per question in seconds.
+                      </p>
+                    </button>
+                  </div>
+
+                  {/* Duration in seconds config */}
+                  {timingChoice === 'question' ? (
+                    <div className="p-3 bg-white dark:bg-[#221d57] rounded-xl border border-[#173c34]/20 dark:border-[#7c6cff]/40 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-[#173c34] dark:text-[#f0eeff]">
+                          Question Duration (Seconds):
+                        </span>
+                        <div className="w-32 relative">
+                          <input
+                            type="number"
+                            min="5"
+                            max="3600"
+                            required
+                            value={questionDurationSeconds}
+                            onChange={(e) => setQuestionDurationSeconds(e.target.value)}
+                            className="w-full px-3 py-1.5 rounded-lg border-2 border-[#173c34] dark:border-[#7c6cff] bg-[#fdfbf7] dark:bg-[#1a1644] text-xs font-bold text-[#173c34] dark:text-[#f0eeff] text-right focus:outline-none"
+                          />
+                          <span className="absolute right-7 top-1/2 -translate-y-1/2 text-xs font-bold text-[#173c34]/50 dark:text-[#aca8d8]/50">
+                            sec
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                        <span className="text-[10px] font-bold text-[#173c34]/60 dark:text-[#aca8d8] mr-1">Presets:</span>
+                        {questionPresets.map((val) => (
+                          <button
+                            key={val}
+                            type="button"
+                            onClick={() => setQuestionDurationSeconds(val)}
+                            className={`text-[11px] font-bold px-2 py-0.5 rounded-md border transition-all ${
+                              parseInt(questionDurationSeconds, 10) === val
+                                ? 'bg-[#173c34] dark:bg-[#5ce1e6] text-white dark:text-[#0c0a23] border-[#173c34] dark:border-[#5ce1e6]'
+                                : 'bg-[#f7f4ec] dark:bg-[#1a1644] text-[#173c34] dark:text-[#aca8d8] border-[#173c34]/30 dark:border-[#7c6cff]/30'
+                            }`}
+                          >
+                            {val}s
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-3 bg-white dark:bg-[#221d57] rounded-xl border border-[#173c34]/20 dark:border-[#7c6cff]/40 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-[#173c34] dark:text-[#f0eeff]">
+                          Whole Quiz Duration (Seconds):
+                        </span>
+                        <div className="w-32 relative">
+                          <input
+                            type="number"
+                            min="30"
+                            max="86400"
+                            required
+                            value={wholeQuizDurationSeconds}
+                            onChange={(e) => setWholeQuizDurationSeconds(e.target.value)}
+                            className="w-full px-3 py-1.5 rounded-lg border-2 border-[#173c34] dark:border-[#7c6cff] bg-[#fdfbf7] dark:bg-[#1a1644] text-xs font-bold text-[#173c34] dark:text-[#f0eeff] text-right focus:outline-none"
+                          />
+                          <span className="absolute right-7 top-1/2 -translate-y-1/2 text-xs font-bold text-[#173c34]/50 dark:text-[#aca8d8]/50">
+                            sec
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                        <span className="text-[10px] font-bold text-[#173c34]/60 dark:text-[#aca8d8] mr-1">Presets:</span>
+                        {quizPresets.map((val) => (
+                          <button
+                            key={val}
+                            type="button"
+                            onClick={() => setWholeQuizDurationSeconds(val)}
+                            className={`text-[11px] font-bold px-2 py-0.5 rounded-md border transition-all ${
+                              parseInt(wholeQuizDurationSeconds, 10) === val
+                                ? 'bg-[#173c34] dark:bg-[#5ce1e6] text-white dark:text-[#0c0a23] border-[#173c34] dark:border-[#5ce1e6]'
+                                : 'bg-[#f7f4ec] dark:bg-[#1a1644] text-[#173c34] dark:text-[#aca8d8] border-[#173c34]/30 dark:border-[#7c6cff]/30'
+                            }`}
+                          >
+                            {val}s
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-4 border-t-2 border-[#173c34]/15 dark:border-[#352f76] flex items-center justify-end space-x-3">

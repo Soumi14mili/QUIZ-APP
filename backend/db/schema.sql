@@ -31,6 +31,9 @@ CREATE TABLE quiz_sessions (
     description     TEXT,
     join_code       VARCHAR(10)     NOT NULL UNIQUE,
     duration_minutes INT            NOT NULL CHECK (duration_minutes > 0),
+    duration_seconds INT            NOT NULL DEFAULT 900 CHECK (duration_seconds > 0),
+    timer_mode      VARCHAR(20)     NOT NULL DEFAULT 'quiz'
+                        CHECK (timer_mode IN ('quiz', 'question')),
     status          VARCHAR(10)     NOT NULL DEFAULT 'draft'
                         CHECK (status IN ('draft', 'live', 'ended')),
     created_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
@@ -53,6 +56,7 @@ CREATE TABLE questions (
     option_c        VARCHAR(500)    NOT NULL,
     option_d        VARCHAR(500)    NOT NULL,
     correct_option  CHAR(1)         NOT NULL CHECK (correct_option IN ('A', 'B', 'C', 'D')),
+    time_limit_seconds INT          NOT NULL DEFAULT 30 CHECK (time_limit_seconds > 0),
     sort_order      INT             NOT NULL DEFAULT 0,
     created_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW()
 );

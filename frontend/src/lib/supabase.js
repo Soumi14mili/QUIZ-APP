@@ -101,24 +101,25 @@ export const getLiveSessions = async () => {
   const { data, error } = await supabase
     .from('quiz_sessions')
     .select(`
-      id,
-      title,
-      description,
-      join_code,
-      duration_minutes,
-      created_at,
-      status,
-      questions (id)
+      *,
+      questions (id, time_limit_seconds)
     `)
     .eq('status', 'live')
     .order('created_at', { ascending: false });
 
   if (error) throw error;
 
-  return data.map((s) => ({
-    ...s,
-    question_count: s.questions ? s.questions.length : 0,
-  }));
+  return data.map((s) => {
+    const durSec = s.duration_seconds || (s.duration_minutes ? s.duration_minutes * 60 : 900);
+    const durMin = s.duration_minutes || Math.max(1, Math.ceil(durSec / 60));
+    return {
+      ...s,
+      duration_seconds: durSec,
+      duration_minutes: durMin,
+      timer_mode: s.timer_mode || 'quiz',
+      question_count: s.questions ? s.questions.length : 0,
+    };
+  });
 };
 
 export const joinQuizSession = async (joinCode) => {
@@ -126,6 +127,24 @@ export const joinQuizSession = async (joinCode) => {
     p_join_code: joinCode,
   });
   if (error) throw error;
+
+  // Ensure default fallback timer properties on joined session
+  if (data?.session) {
+    const s = data.session;
+    const durSec = s.duration_seconds || (s.duration_minutes ? s.duration_minutes * 60 : 900);
+    data.session.duration_seconds = durSec;
+    data.session.duration_minutes = s.duration_minutes || Math.max(1, Math.ceil(durSec / 60));
+    data.session.timer_mode = s.timer_mode || 'quiz';
+  }
+
+  // Ensure default time_limit_seconds on each question
+  if (Array.isArray(data?.questions)) {
+    data.questions = data.questions.map((q) => ({
+      ...q,
+      time_limit_seconds: q.time_limit_seconds || 30,
+    }));
+  }
+
   return data;
 };
 
@@ -162,30 +181,29 @@ export const getAdminSessions = async () => {
   const { data, error } = await supabase
     .from('quiz_sessions')
     .select(`
-      id,
-      admin_id,
-      title,
-      description,
-      join_code,
-      duration_minutes,
-      status,
-      created_at,
-      updated_at,
-      questions (id),
+      *,
+      questions (id, time_limit_seconds),
       quiz_attempts (id)
     `)
     .order('created_at', { ascending: false });
 
   if (error) throw error;
 
-  return data.map((s) => ({
-    ...s,
-    question_count: s.questions ? s.questions.length : 0,
-    participant_count: s.quiz_attempts ? s.quiz_attempts.length : 0,
-  }));
+  return data.map((s) => {
+    const durSec = s.duration_seconds || (s.duration_minutes ? s.duration_minutes * 60 : 900);
+    const durMin = s.duration_minutes || Math.max(1, Math.ceil(durSec / 60));
+    return {
+      ...s,
+      duration_seconds: durSec,
+      duration_minutes: durMin,
+      timer_mode: s.timer_mode || 'quiz',
+      question_count: s.questions ? s.questions.length : 0,
+      participant_count: s.quiz_attempts ? s.quiz_attempts.length : 0,
+    };
+  });
 };
 
-export const createQuizSession = async ({ title, description, duration_minutes }) => {
+export const createQuizSession = async ({ title, description, duration_minutes, duration_seconds, timer_mode }) => {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.user) throw new Error('Not authenticated');
 
@@ -196,23 +214,63 @@ export const createQuizSession = async ({ title, description, duration_minutes }
     joinCode += chars.charAt(Math.floor(Math.random() * chars.length));
   }
 
-  const { data, error } = await supabase
-    .from('quiz_sessions')
-    .insert([
-      {
-        admin_id: session.user.id,
-        title,
-        description,
-        duration_minutes: parseInt(duration_minutes, 10),
-        join_code: joinCode,
-        status: 'draft',
-      },
-    ])
-    .select()
-    .single();
+  let finalSeconds = parseInt(duration_seconds, 10);
+  let finalMinutes = parseInt(duration_minutes, 10);
 
-  if (error) throw error;
-  return data;
+  if (isNaN(finalSeconds) || finalSeconds <= 0) {
+    if (!isNaN(finalMinutes) && finalMinutes > 0) {
+      finalSeconds = finalMinutes * 60;
+    } else {
+      finalSeconds = 900;
+    }
+  }
+  finalMinutes = Math.max(1, Math.ceil(finalSeconds / 60));
+  const finalMode = timer_mode === 'question' ? 'question' : 'quiz';
+
+  const insertPayload = {
+    admin_id: session.user.id,
+    title,
+    description,
+    duration_minutes: finalMinutes,
+    duration_seconds: finalSeconds,
+    timer_mode: finalMode,
+    join_code: joinCode,
+    status: 'draft',
+  };
+
+  try {
+    const { data, error } = await supabase
+      .from('quiz_sessions')
+      .insert([insertPayload])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    // Graceful fallback if database does not yet have duration_seconds or timer_mode columns
+    console.warn('Fallback inserting quiz_session without optional timer fields:', err);
+    const fallbackPayload = {
+      admin_id: session.user.id,
+      title,
+      description,
+      duration_minutes: finalMinutes,
+      join_code: joinCode,
+      status: 'draft',
+    };
+    const { data, error } = await supabase
+      .from('quiz_sessions')
+      .insert([fallbackPayload])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return {
+      ...data,
+      duration_seconds: finalSeconds,
+      timer_mode: finalMode,
+    };
+  }
 };
 
 export const updateQuizSession = async (sessionId, updateData) => {
@@ -224,15 +282,52 @@ export const updateQuizSession = async (sessionId, updateData) => {
     payload.status = payload.status.toLowerCase();
   }
 
-  const { data, error } = await supabase
-    .from('quiz_sessions')
-    .update(payload)
-    .eq('id', sessionId)
-    .select()
-    .single();
+  if (payload.duration_seconds !== undefined) {
+    const secs = parseInt(payload.duration_seconds, 10);
+    if (!isNaN(secs) && secs > 0) {
+      payload.duration_seconds = secs;
+      payload.duration_minutes = Math.max(1, Math.ceil(secs / 60));
+    }
+  } else if (payload.duration_minutes !== undefined) {
+    const mins = parseInt(payload.duration_minutes, 10);
+    if (!isNaN(mins) && mins > 0) {
+      payload.duration_minutes = mins;
+      payload.duration_seconds = mins * 60;
+    }
+  }
 
-  if (error) throw error;
-  return data;
+  if (payload.timer_mode && !['quiz', 'question'].includes(payload.timer_mode)) {
+    payload.timer_mode = 'quiz';
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('quiz_sessions')
+      .update(payload)
+      .eq('id', sessionId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    // If optional column error, fallback without duration_seconds / timer_mode
+    console.warn('Fallback updating quiz_session:', err);
+    const { duration_seconds, timer_mode, ...safePayload } = payload;
+    const { data, error } = await supabase
+      .from('quiz_sessions')
+      .update(safePayload)
+      .eq('id', sessionId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return {
+      ...data,
+      duration_seconds: payload.duration_seconds || (data.duration_minutes * 60),
+      timer_mode: payload.timer_mode || 'quiz',
+    };
+  }
 };
 
 export const deleteQuizSession = async (sessionId) => {
@@ -253,30 +348,84 @@ export const getSessionQuestions = async (sessionId) => {
     .order('created_at', { ascending: true });
 
   if (error) throw error;
-  return data;
+  return (data || []).map((q) => ({
+    ...q,
+    time_limit_seconds: q.time_limit_seconds || 30,
+  }));
 };
 
 export const addQuestion = async (sessionId, questionData) => {
-  const { data, error } = await supabase
-    .from('questions')
-    .insert([{ ...questionData, session_id: sessionId }])
-    .select()
-    .single();
+  const timeLimit = parseInt(questionData.time_limit_seconds, 10) || 30;
+  const payload = {
+    ...questionData,
+    time_limit_seconds: timeLimit,
+    session_id: sessionId,
+  };
 
-  if (error) throw error;
-  return data;
+  try {
+    const { data, error } = await supabase
+      .from('questions')
+      .insert([payload])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.warn('Fallback inserting question without time_limit_seconds:', err);
+    const { time_limit_seconds, ...safePayload } = payload;
+    const { data, error } = await supabase
+      .from('questions')
+      .insert([safePayload])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return {
+      ...data,
+      time_limit_seconds: timeLimit,
+    };
+  }
 };
 
 export const updateQuestion = async (questionId, questionData) => {
-  const { data, error } = await supabase
-    .from('questions')
-    .update(questionData)
-    .eq('id', questionId)
-    .select()
-    .single();
+  const timeLimit = questionData.time_limit_seconds !== undefined
+    ? parseInt(questionData.time_limit_seconds, 10) || 30
+    : undefined;
 
-  if (error) throw error;
-  return data;
+  const payload = {
+    ...questionData,
+  };
+  if (timeLimit !== undefined) {
+    payload.time_limit_seconds = timeLimit;
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('questions')
+      .update(payload)
+      .eq('id', questionId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.warn('Fallback updating question without time_limit_seconds:', err);
+    const { time_limit_seconds, ...safePayload } = payload;
+    const { data, error } = await supabase
+      .from('questions')
+      .update(safePayload)
+      .eq('id', questionId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return {
+      ...data,
+      time_limit_seconds: timeLimit || 30,
+    };
+  }
 };
 
 export const deleteQuestion = async (questionId) => {

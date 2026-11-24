@@ -265,7 +265,13 @@ function StudentDashboardContent() {
                       <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[#173c34]/10 dark:border-[#2f3a60] text-xs font-semibold text-[#173c34] dark:text-[#f1f3f9]">
                         <div className="flex items-center space-x-1.5 bg-[#fdfbf7] dark:bg-[#1c223c] p-2 rounded-xl border border-[#173c34]/15 dark:border-[#2f3a60]">
                           <FiClock className="w-4 h-4 text-[#ff6b8b]" />
-                          <span>{session.duration_minutes || 10} Mins</span>
+                          <span>
+                            {session.timer_mode === 'question'
+                              ? `${session.duration_seconds || 30}s / Q`
+                              : (session.duration_seconds && session.duration_seconds < 60
+                                  ? `${session.duration_seconds}s`
+                                  : `${session.duration_minutes || Math.ceil((session.duration_seconds || 600) / 60)} Mins`)}
+                          </span>
                         </div>
                         <div className="flex items-center space-x-1.5 bg-[#fdfbf7] dark:bg-[#1c223c] p-2 rounded-xl border border-[#173c34]/15 dark:border-[#2f3a60]">
                           <FiHelpCircle className="w-4 h-4 text-[#5ce1e6]" />

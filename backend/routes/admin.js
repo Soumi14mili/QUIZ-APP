@@ -36,24 +36,32 @@ async function generateUniqueJoinCode() {
 // POST /sessions — create quiz session
 router.post('/sessions', async (req, res, next) => {
   try {
-    const { title, description, duration_minutes } = req.body;
+    const { title, description, duration_minutes, duration_seconds, timer_mode } = req.body;
 
     if (!title || typeof title !== 'string' || !title.trim()) {
       return res.status(400).json({ error: 'Session title is required' });
     }
 
-    const duration = parseInt(duration_minutes, 10);
-    if (isNaN(duration) || duration <= 0) {
-      return res.status(400).json({ error: 'duration_minutes must be a positive integer' });
-    }
+    let parsedSeconds = parseInt(duration_seconds, 10);
+    let parsedMinutes = parseInt(duration_minutes, 10);
 
+    if (isNaN(parsedSeconds) || parsedSeconds <= 0) {
+      if (!isNaN(parsedMinutes) && parsedMinutes > 0) {
+        parsedSeconds = parsedMinutes * 60;
+      } else {
+        parsedSeconds = 900;
+      }
+    }
+    parsedMinutes = Math.max(1, Math.ceil(parsedSeconds / 60));
+
+    const mode = timer_mode === 'question' ? 'question' : 'quiz';
     const joinCode = await generateUniqueJoinCode();
 
     const result = await pool.query(
-      `INSERT INTO quiz_sessions (admin_id, title, description, join_code, duration_minutes, status)
-       VALUES ($1, $2, $3, $4, $5, 'draft')
-       RETURNING id, admin_id, title, description, join_code, duration_minutes, status, created_at, updated_at`,
-      [req.user.id, title.trim(), description ? description.trim() : null, joinCode, duration]
+      `INSERT INTO quiz_sessions (admin_id, title, description, join_code, duration_minutes, duration_seconds, timer_mode, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'draft')
+       RETURNING id, admin_id, title, description, join_code, duration_minutes, duration_seconds, timer_mode, status, created_at, updated_at`,
+      [req.user.id, title.trim(), description ? description.trim() : null, joinCode, parsedMinutes, parsedSeconds, mode]
     );
 
     return res.status(201).json({
@@ -76,6 +84,8 @@ router.get('/sessions', async (req, res, next) => {
          qs.description,
          qs.join_code,
          qs.duration_minutes,
+         qs.duration_seconds,
+         qs.timer_mode,
          qs.status,
          qs.created_at,
          qs.updated_at,
@@ -109,6 +119,8 @@ router.get('/sessions/:id', async (req, res, next) => {
          qs.description,
          qs.join_code,
          qs.duration_minutes,
+         qs.duration_seconds,
+         qs.timer_mode,
          qs.status,
          qs.created_at,
          qs.updated_at,
@@ -136,11 +148,11 @@ router.get('/sessions/:id', async (req, res, next) => {
 router.put('/sessions/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { title, description, duration_minutes, status } = req.body;
+    const { title, description, duration_minutes, duration_seconds, timer_mode, status } = req.body;
 
     // Check ownership
     const existing = await pool.query(
-      'SELECT id FROM quiz_sessions WHERE id = $1 AND admin_id = $2',
+      'SELECT id, duration_seconds, duration_minutes FROM quiz_sessions WHERE id = $1 AND admin_id = $2',
       [id, req.user.id]
     );
 
@@ -148,12 +160,28 @@ router.put('/sessions/:id', async (req, res, next) => {
       return res.status(404).json({ error: 'Quiz session not found' });
     }
 
-    let parsedDuration = null;
-    if (duration_minutes !== undefined) {
-      parsedDuration = parseInt(duration_minutes, 10);
-      if (isNaN(parsedDuration) || parsedDuration <= 0) {
+    let parsedSeconds = null;
+    let parsedMinutes = null;
+    if (duration_seconds !== undefined) {
+      parsedSeconds = parseInt(duration_seconds, 10);
+      if (isNaN(parsedSeconds) || parsedSeconds <= 0) {
+        return res.status(400).json({ error: 'duration_seconds must be a positive integer' });
+      }
+      parsedMinutes = Math.max(1, Math.ceil(parsedSeconds / 60));
+    } else if (duration_minutes !== undefined) {
+      parsedMinutes = parseInt(duration_minutes, 10);
+      if (isNaN(parsedMinutes) || parsedMinutes <= 0) {
         return res.status(400).json({ error: 'duration_minutes must be a positive integer' });
       }
+      parsedSeconds = parsedMinutes * 60;
+    }
+
+    let normalizedMode = null;
+    if (timer_mode !== undefined) {
+      if (!['quiz', 'question'].includes(timer_mode)) {
+        return res.status(400).json({ error: 'timer_mode must be quiz or question' });
+      }
+      normalizedMode = timer_mode;
     }
 
     if (status !== undefined) {
@@ -168,14 +196,18 @@ router.put('/sessions/:id', async (req, res, next) => {
          title = COALESCE($1, title),
          description = CASE WHEN $2::text IS NOT NULL THEN $2 ELSE description END,
          duration_minutes = COALESCE($3, duration_minutes),
-         status = COALESCE($4, status),
+         duration_seconds = COALESCE($4, duration_seconds),
+         timer_mode = COALESCE($5, timer_mode),
+         status = COALESCE($6, status),
          updated_at = NOW()
-       WHERE id = $5 AND admin_id = $6
-       RETURNING id, admin_id, title, description, join_code, duration_minutes, status, created_at, updated_at`,
+       WHERE id = $7 AND admin_id = $8
+       RETURNING id, admin_id, title, description, join_code, duration_minutes, duration_seconds, timer_mode, status, created_at, updated_at`,
       [
         title ? title.trim() : null,
         description !== undefined ? description : null,
-        parsedDuration,
+        parsedMinutes,
+        parsedSeconds,
+        normalizedMode,
         status || null,
         id,
         req.user.id,
@@ -219,11 +251,11 @@ router.delete('/sessions/:id', async (req, res, next) => {
 router.post('/sessions/:id/questions', async (req, res, next) => {
   try {
     const { id: sessionId } = req.params;
-    const { question_text, option_a, option_b, option_c, option_d, correct_option, sort_order } = req.body;
+    const { question_text, option_a, option_b, option_c, option_d, correct_option, sort_order, time_limit_seconds } = req.body;
 
     // Verify session belongs to this admin
     const sessionCheck = await pool.query(
-      'SELECT id FROM quiz_sessions WHERE id = $1 AND admin_id = $2',
+      'SELECT id, duration_seconds FROM quiz_sessions WHERE id = $1 AND admin_id = $2',
       [sessionId, req.user.id]
     );
     if (sessionCheck.rows.length === 0) {
@@ -241,6 +273,11 @@ router.post('/sessions/:id/questions', async (req, res, next) => {
       return res.status(400).json({ error: 'correct_option must be A, B, C, or D' });
     }
 
+    let parsedTimeLimit = parseInt(time_limit_seconds, 10);
+    if (isNaN(parsedTimeLimit) || parsedTimeLimit <= 0) {
+      parsedTimeLimit = 30;
+    }
+
     let calculatedOrder = sort_order;
     if (calculatedOrder === undefined || calculatedOrder === null) {
       const orderQuery = await pool.query(
@@ -251,9 +288,9 @@ router.post('/sessions/:id/questions', async (req, res, next) => {
     }
 
     const result = await pool.query(
-      `INSERT INTO questions (session_id, question_text, option_a, option_b, option_c, option_d, correct_option, sort_order)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-       RETURNING id, session_id, question_text, option_a, option_b, option_c, option_d, correct_option, sort_order, created_at`,
+      `INSERT INTO questions (session_id, question_text, option_a, option_b, option_c, option_d, correct_option, time_limit_seconds, sort_order)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       RETURNING id, session_id, question_text, option_a, option_b, option_c, option_d, correct_option, time_limit_seconds, sort_order, created_at`,
       [
         sessionId,
         question_text.trim(),
@@ -262,6 +299,7 @@ router.post('/sessions/:id/questions', async (req, res, next) => {
         option_c.trim(),
         option_d.trim(),
         normalizedCorrect,
+        parsedTimeLimit,
         calculatedOrder,
       ]
     );
@@ -290,7 +328,7 @@ router.get('/sessions/:id/questions', async (req, res, next) => {
     }
 
     const result = await pool.query(
-      `SELECT id, session_id, question_text, option_a, option_b, option_c, option_d, correct_option, sort_order, created_at
+      `SELECT id, session_id, question_text, option_a, option_b, option_c, option_d, correct_option, time_limit_seconds, sort_order, created_at
        FROM questions
        WHERE session_id = $1
        ORDER BY sort_order ASC, created_at ASC`,
@@ -307,7 +345,7 @@ router.get('/sessions/:id/questions', async (req, res, next) => {
 router.put('/questions/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { question_text, option_a, option_b, option_c, option_d, correct_option, sort_order } = req.body;
+    const { question_text, option_a, option_b, option_c, option_d, correct_option, time_limit_seconds, sort_order } = req.body;
 
     // Verify question belongs to an admin's session
     const existing = await pool.query(
@@ -330,6 +368,14 @@ router.put('/questions/:id', async (req, res, next) => {
       }
     }
 
+    let parsedTimeLimit = null;
+    if (time_limit_seconds !== undefined) {
+      parsedTimeLimit = parseInt(time_limit_seconds, 10);
+      if (isNaN(parsedTimeLimit) || parsedTimeLimit <= 0) {
+        parsedTimeLimit = 30;
+      }
+    }
+
     const result = await pool.query(
       `UPDATE questions
        SET 
@@ -339,9 +385,10 @@ router.put('/questions/:id', async (req, res, next) => {
          option_c = COALESCE($4, option_c),
          option_d = COALESCE($5, option_d),
          correct_option = COALESCE($6, correct_option),
-         sort_order = COALESCE($7, sort_order)
-       WHERE id = $8
-       RETURNING id, session_id, question_text, option_a, option_b, option_c, option_d, correct_option, sort_order, created_at`,
+         time_limit_seconds = COALESCE($7, time_limit_seconds),
+         sort_order = COALESCE($8, sort_order)
+       WHERE id = $9
+       RETURNING id, session_id, question_text, option_a, option_b, option_c, option_d, correct_option, time_limit_seconds, sort_order, created_at`,
       [
         question_text ? question_text.trim() : null,
         option_a ? option_a.trim() : null,
@@ -349,6 +396,7 @@ router.put('/questions/:id', async (req, res, next) => {
         option_c ? option_c.trim() : null,
         option_d ? option_d.trim() : null,
         normalizedCorrect,
+        parsedTimeLimit,
         sort_order !== undefined ? sort_order : null,
         id,
       ]

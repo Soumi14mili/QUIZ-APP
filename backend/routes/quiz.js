@@ -17,6 +17,8 @@ router.get('/sessions', async (req, res, next) => {
          qs.description,
          qs.join_code,
          qs.duration_minutes,
+         qs.duration_seconds,
+         qs.timer_mode,
          qs.created_at,
          COUNT(q.id)::int AS question_count
        FROM quiz_sessions qs
@@ -45,7 +47,7 @@ router.post('/sessions/join', async (req, res, next) => {
 
     // Check if session exists and is live
     const sessionResult = await pool.query(
-      `SELECT id, title, description, join_code, duration_minutes, status
+      `SELECT id, title, description, join_code, duration_minutes, duration_seconds, timer_mode, status
        FROM quiz_sessions
        WHERE join_code = $1`,
       [code]
@@ -92,7 +94,7 @@ router.post('/sessions/join', async (req, res, next) => {
 
     // Fetch questions WITHOUT correct_option
     const questionsResult = await pool.query(
-      `SELECT id, session_id, question_text, option_a, option_b, option_c, option_d, sort_order
+      `SELECT id, session_id, question_text, option_a, option_b, option_c, option_d, time_limit_seconds, sort_order
        FROM questions
        WHERE session_id = $1
        ORDER BY sort_order ASC, created_at ASC`,
@@ -107,6 +109,8 @@ router.post('/sessions/join', async (req, res, next) => {
         description: session.description,
         join_code: session.join_code,
         duration_minutes: session.duration_minutes,
+        duration_seconds: session.duration_seconds || session.duration_minutes * 60,
+        timer_mode: session.timer_mode || 'quiz',
       },
       attempt,
       questions: questionsResult.rows,
@@ -171,7 +175,7 @@ router.post('/attempts/:attemptId/submit', async (req, res, next) => {
 
     // Fetch attempt with session duration
     const attemptQuery = await client.query(
-      `SELECT qa.id, qa.session_id, qa.student_id, qa.started_at, qa.submitted_at, qa.status, qs.duration_minutes
+      `SELECT qa.id, qa.session_id, qa.student_id, qa.started_at, qa.submitted_at, qa.status, qs.duration_minutes, qs.duration_seconds, qs.timer_mode
        FROM quiz_attempts qa
        JOIN quiz_sessions qs ON qa.session_id = qs.id
        WHERE qa.id = $1`,
@@ -205,7 +209,8 @@ router.post('/attempts/:attemptId/submit', async (req, res, next) => {
     }
 
     // Cap the time if it exceeded session duration (do not reject)
-    const maxDurationMs = attempt.duration_minutes * 60 * 1000;
+    const effectiveDurationSeconds = attempt.duration_seconds || (attempt.duration_minutes * 60);
+    const maxDurationMs = effectiveDurationSeconds * 1000;
     if (timeTakenMs > maxDurationMs) {
       timeTakenMs = maxDurationMs;
     }
